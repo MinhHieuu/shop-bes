@@ -1,10 +1,12 @@
 package com.beeshop.sd44.service;
 
+import com.beeshop.sd44.dto.response.UserResponse;
 import com.beeshop.sd44.entity.User;
 import com.beeshop.sd44.repository.UserRepo;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -29,4 +31,21 @@ public class UserService {
         return this.userRepo.existsByEmailOrPhone(email, phone);
     }
 
+    public User getUserById(UUID id) {
+        Optional<User> user = userRepo.findById(id);
+        if(user.isPresent()) {
+            return user.get();
+        }
+        return null;
+    }
+
+    public UserResponse buildRespone(User user) {
+        UserResponse response = new UserResponse();
+        response.setName(user.getName());
+        response.setEmail(user.getEmail());
+        response.setPhone(user.getPhone());
+        response.setAddress(user.getAddress());
+        response.setRole(user.getRole());
+        return response;
+    }
 }

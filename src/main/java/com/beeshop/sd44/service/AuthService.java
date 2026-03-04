@@ -41,17 +41,7 @@ public class AuthService {
                 .setExpiryDate(new Date(System.currentTimeMillis() + jwtService.getRefreshExpirationSeconds() * 1000));
         refreshTokenRepo.save(refreshToken);
 
-        return new LoginResponse(access, refresh, buildRespone(user));
-    }
-
-    public UserResponse buildRespone(User user) {
-        UserResponse response = new UserResponse();
-        response.setName(user.getName());
-        response.setEmail(user.getEmail());
-        response.setPhone(user.getPhone());
-        response.setAddress(user.getAddress());
-        response.setRole(user.getRole());
-        return response;
+        return new LoginResponse(access, refresh, userService.buildRespone(user));
     }
 
     public String refreshAccessToken(String refreshToken) {

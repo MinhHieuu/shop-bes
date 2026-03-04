@@ -70,4 +70,5 @@ public class CartService {
         response.setTotalPrice(cartDetail.getPrice() * cartDetail.getQuantity());
         return response;
     }
+
 }

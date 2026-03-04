@@ -69,7 +69,7 @@ public class AuthController {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setRole("user"); // Mặc định role là "user"
         user.setDeleteFlag(false);
-        UserResponse response = this.authService.buildRespone(userService.createUser(user));
+        UserResponse response = this.userService.buildRespone(userService.createUser(user));
         return ResponseEntity.status(201).body(new ApiResponse<>("tao moi thanh cong", response));
     }
 }
