@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/api/admin")
 public class SizeController {
     private final SizeService service;
     public SizeController(SizeService service) {

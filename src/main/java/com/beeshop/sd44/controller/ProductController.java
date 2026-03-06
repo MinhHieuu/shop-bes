@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/api/admin")
 public class ProductController {
     private final ProductService productService;
     private final BrandService brandService;

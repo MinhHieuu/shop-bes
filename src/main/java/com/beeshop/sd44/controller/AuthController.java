@@ -12,12 +12,10 @@ import com.beeshop.sd44.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/api")
 public class AuthController {
     private final AuthService authService;
     private final PasswordEncoder passwordEncoder;
@@ -29,7 +27,7 @@ public class AuthController {
         this.userService = userService;
     }
 
-    @PostMapping("/login")
+    @PostMapping("login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) throws EntityNotFoundException {
         LoginResponse response = this.authService.login(loginRequest);
         if (response == null) {
@@ -41,7 +39,7 @@ public class AuthController {
                 .body(new ApiResponse<>("dang nhap thanh cong", response));
     }
 
-    @PostMapping("/refresh")
+    @PostMapping("refresh")
     public ResponseEntity<?> refresh(@RequestBody RefreshRequest request) {
         String newAccess = authService.refreshAccessToken(request.getRefreshToken());
         if (newAccess == null) {
@@ -52,7 +50,7 @@ public class AuthController {
                 .body(new ApiResponse<>("cap token moi thanh cong", newAccess));
     }
 
-    @GetMapping("/logout")
+    @GetMapping("logout")
     public ResponseEntity<ApiResponse<?>> logout(@RequestBody RefreshRequest request) {
         boolean ok = authService.revokeRefreshToken(request.getRefreshToken());
         if (!ok) {
@@ -61,7 +59,7 @@ public class AuthController {
         return ResponseEntity.ok().body(new ApiResponse<>("dang xuat thanh cong", null));
     }
 
-    @PostMapping("/register")
+    @PostMapping("register")
     public ResponseEntity<?> register(@RequestBody User user) {
         if (userService.isUserExit(user.getEmail(), user.getPhone())) {
             return ResponseEntity.status(409).body(new ApiResponse<>("email hoac sdt da duoc dang ky", null));

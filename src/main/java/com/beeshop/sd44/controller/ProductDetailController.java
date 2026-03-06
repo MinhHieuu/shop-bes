@@ -16,7 +16,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/admin/product-detail")
+@RequestMapping("/api/admin/product-detail")
 public class ProductDetailController {
     private final ProductDetailService productDetailService;
     private final ImageService imageService;
