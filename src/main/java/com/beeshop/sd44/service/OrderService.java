@@ -57,16 +57,16 @@ public class OrderService {
         order.setCode("HD" + order.getSum());
         if (orderRequest.getPaymentMethod().equals("COD")) {
             order.setPaymentStatus(1);
-        } else if (orderRequest.getPaymentMethod().equals("MOMO")) {
+        } else if (orderRequest.getPaymentMethod().equals("Online")) {
             order.setPaymentStatus(0); // đang thanh toán
         }
         return this.orderRepo.save(order);
     }
 
-    public Order updateOrderStatus(UUID orderId, Integer status) {
+    public Order updateOrderStatus(UUID orderId, Integer paymentStatus) {
         Order order = orderRepo.findById(orderId).orElse(null);
         if (order != null) {
-            order.setStatus(status);
+            order.setPaymentStatus(paymentStatus);
             order.setPaymentDate(new Date());
             return orderRepo.save(order);
         }

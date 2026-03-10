@@ -12,8 +12,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.TreeMap;
-
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -110,42 +108,6 @@ public class VNPayService {
         return response;
     }
 
-    // public static String md5(String message) {
-    // String digest = null;
-    // try {
-    // MessageDigest md = MessageDigest.getInstance("MD5");
-    // byte[] hash = md.digest(message.getBytes("UTF-8"));
-    // StringBuilder sb = new StringBuilder(2 * hash.length);
-    // for (byte b : hash) {
-    // sb.append(String.format("%02x", b & 0xff));
-    // }
-    // digest = sb.toString();
-    // } catch (UnsupportedEncodingException ex) {
-    // digest = "";
-    // } catch (NoSuchAlgorithmException ex) {
-    // digest = "";
-    // }
-    // return digest;
-    // }
-
-    // public static String Sha256(String message) {
-    // String digest = null;
-    // try {
-    // MessageDigest md = MessageDigest.getInstance("SHA-256");
-    // byte[] hash = md.digest(message.getBytes("UTF-8"));
-    // StringBuilder sb = new StringBuilder(2 * hash.length);
-    // for (byte b : hash) {
-    // sb.append(String.format("%02x", b & 0xff));
-    // }
-    // digest = sb.toString();
-    // } catch (UnsupportedEncodingException ex) {
-    // digest = "";
-    // } catch (NoSuchAlgorithmException ex) {
-    // digest = "";
-    // }
-    // return digest;
-    // }
-
     public static String hmacSHA512(String key, final String data) {
         try {
 
@@ -215,24 +177,4 @@ public class VNPayService {
         String calculatedHash = hmacSHA512(vnp_secretKey, hashData.toString());
         return calculatedHash.equalsIgnoreCase(vnp_SecureHash);
     }
-    // public boolean verifyPayment(Map<String, String> params) {
-    // // Implement VNPay signature verification
-    // // This is a basic implementation, you may need to adjust based on VNPay docs
-    // String vnp_SecureHash = params.get("vnp_SecureHash");
-    // params.remove("vnp_SecureHash");
-    // params.remove("vnp_SecureHashType");
-
-    // // Sort params
-    // Map<String, String> sortedParams = new TreeMap<>(params);
-    // StringBuilder hashData = new StringBuilder();
-    // for (Map.Entry<String, String> entry : sortedParams.entrySet()) {
-    // if (entry.getValue() != null && !entry.getValue().isEmpty()) {
-    // hashData.append(entry.getKey()).append("=").append(entry.getValue()).append("&");
-    // }
-    // }
-    // hashData.setLength(hashData.length() - 1); // Remove last &
-
-    // String calculatedHash = hmacSHA512(vnp_secretKey, hashData.toString());
-    // return calculatedHash.equals(vnp_SecureHash);
-    // }
 }

@@ -1,6 +1,5 @@
 package com.beeshop.sd44.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.io.Decoders;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -41,11 +40,6 @@ public class SecurityConfig {
     public RestTemplate restTemplate() {
         return new RestTemplate();
     }
-    //
-    // @Bean
-    // public ObjectMapper objectMapper() {
-    // return new ObjectMapper();
-    // }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
