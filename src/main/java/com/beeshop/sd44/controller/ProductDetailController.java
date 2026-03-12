@@ -6,13 +6,10 @@ import com.beeshop.sd44.entity.*;
 import com.beeshop.sd44.service.ProductDetailService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/admin/product-detail")
@@ -21,6 +18,7 @@ public class ProductDetailController {
     public ProductDetailController(ProductDetailService productDetailService) {
         this.productDetailService = productDetailService;
     }
+
     @GetMapping("")
     public ResponseEntity<ApiResponse<List<ProductDetailResponse>>> getListProductDetail() {
         List<ProductDetailResponse> list = this.productDetailService.getListDetail(false);
@@ -37,25 +35,15 @@ public class ProductDetailController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<ProductDetailResponse>> createProductDetail(@Valid @RequestBody ProductDetailRequest detail,
-                                                                    BindingResult result) {
-        List<FieldError> errors = result.getFieldErrors();
-        Boolean exitName = this.productDetailService.isNameExit(detail.getName());
-        if(result.hasErrors()) {
-            String errorMessages = errors.stream()
-                    .map(FieldError::getDefaultMessage)
-                    .collect(Collectors.joining(", "));
-            return ResponseEntity.badRequest().body(new ApiResponse<>(errorMessages, null));
-        }
-        if(exitName == true) {
+    public ResponseEntity<ApiResponse<ProductDetailResponse>> createProductDetail(@Valid @RequestBody ProductDetailRequest detail) {
+        if(this.productDetailService.isNameExit(detail.getName())) {
             return ResponseEntity.status(409).body(new ApiResponse<>("ten da ton tai", null));
         }
         Color color = new Color(detail.getColorId());
         Size size = new Size(detail.getSizeId());
         Product product = new Product();
         product.setId(detail.getProductId());
-        Boolean exitsProduct = this.productDetailService.isProductExit(product, color, size);
-        if(exitsProduct) {
+        if(this.productDetailService.isProductExit(product, color, size)) {
             return ResponseEntity.status(409).body(new ApiResponse<>("san pham da ton tai", null));
         }
         ProductDetailResponse productDetail = this.productDetailService.createProductDetail(detail);
@@ -69,24 +57,14 @@ public class ProductDetailController {
     }
 
     @PutMapping("")
-    public ResponseEntity<ApiResponse<ProductDetailResponse>> updateProductDetail(@Valid @RequestBody ProductDetailRequest request,
-                                                                          BindingResult result) {
+    public ResponseEntity<ApiResponse<ProductDetailResponse>> updateProductDetail(@Valid @RequestBody ProductDetailRequest request) {
         ProductDetail detail = this.productDetailService.getById(request.getId());
         if (detail == null) {
             return ResponseEntity.status(404).body(new ApiResponse<>("khong tim thay san pham chi tiet", null));
         }
-        List<FieldError> errors = result.getFieldErrors();
-        if(result.hasErrors()) {
-            String errorMessages = errors.stream()
-                    .map(FieldError::getDefaultMessage)
-                    .collect(Collectors.joining(", "));
-            return ResponseEntity.badRequest().body(new ApiResponse<>(errorMessages, null));
-        }
-        // Check name conflict, excluding the current record
         if (this.productDetailService.isNameExit(request.getName(), request.getId())) {
             return ResponseEntity.status(409).body(new ApiResponse<>("trung ten san pham", null));
         }
-        // Check product+color+size conflict, excluding the current record
         Color color = new Color(request.getColorId());
         Size size = new Size(request.getSizeId());
         Product product = new Product();
@@ -108,6 +86,4 @@ public class ProductDetailController {
         }
         return ResponseEntity.ok().body(new ApiResponse<>("tim thanh cong", listResponse));
     }
-
-
 }

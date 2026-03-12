@@ -8,13 +8,10 @@ import com.beeshop.sd44.service.ProductDetailService;
 import com.beeshop.sd44.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -46,16 +43,8 @@ public class ProductController {
     }
 
     @PostMapping("san-pham")
-    public ResponseEntity<ApiResponse<ProductResponse>> createProduct(@Valid @RequestBody ProductRequest productRequest, BindingResult result) {
-        List<FieldError> errors = result.getFieldErrors();
-        Boolean exitName = this.productService.isNameExit(productRequest.getName());
-        if(result.hasErrors()) {
-            String errorMessages = errors.stream()
-                    .map(FieldError::getDefaultMessage)
-                    .collect(Collectors.joining(", "));
-            return ResponseEntity.badRequest().body(new ApiResponse<>(errorMessages, null));
-        }
-        if(exitName == true) {
+    public ResponseEntity<ApiResponse<ProductResponse>> createProduct(@Valid @RequestBody ProductRequest productRequest) {
+        if(this.productService.isNameExit(productRequest.getName())) {
             return ResponseEntity.status(409).body(new ApiResponse<>("trung ten san pham", null));
         }
         Product product = this.productService.createProduct(productRequest);
@@ -64,21 +53,12 @@ public class ProductController {
     }
 
     @PutMapping("san-pham")
-    public ResponseEntity<ApiResponse<ProductResponse>> updateProduct(@Valid @RequestBody ProductRequest productRequest,
-                                                                      BindingResult result) {
+    public ResponseEntity<ApiResponse<ProductResponse>> updateProduct(@Valid @RequestBody ProductRequest productRequest) {
         Product product = this.productService.getById(productRequest.getId());
         if(product == null) {
             return ResponseEntity.status(404).body(new ApiResponse<>("khong tim thay san pham", null));
         }
-        List<FieldError> errors = result.getFieldErrors();
-        Boolean exitName = this.productService.isNameExit(productRequest.getName());
-        if(result.hasErrors()) {
-            String errorMessages = errors.stream()
-                    .map(FieldError::getDefaultMessage)
-                    .collect(Collectors.joining(", "));
-            return ResponseEntity.badRequest().body(new ApiResponse<>(errorMessages, null));
-        }
-        if(exitName == true && !product.getName().equals(productRequest.getName())) {
+        if(this.productService.isNameExit(productRequest.getName()) && !product.getName().equals(productRequest.getName())) {
             return ResponseEntity.status(409).body(new ApiResponse<>("trung ten san pham", null));
         }
         Product newProduct = this.productService.updateProduct(productRequest);

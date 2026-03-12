@@ -44,6 +44,13 @@ public class UserService {
         return userRepo.findAllByDeleteFlag(false);
     }
 
+    public List<User> searchUsers(String keyword, String role) {
+        return userRepo.searchUsers(
+                (keyword != null && keyword.isBlank()) ? null : keyword,
+                (role != null && role.isBlank()) ? null : role
+        );
+    }
+
     public User updateUser(User user) {
         return userRepo.save(user);
     }

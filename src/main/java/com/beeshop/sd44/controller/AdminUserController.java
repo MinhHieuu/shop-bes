@@ -25,8 +25,15 @@ public class AdminUserController {
     }
 
     @GetMapping("")
-    public ResponseEntity<ApiResponse<List<UserResponse>>> getAllUsers() {
-        List<User> users = userService.getAllActiveUsers();
+    public ResponseEntity<ApiResponse<List<UserResponse>>> getAllUsers(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String role) {
+        List<User> users;
+        if ((keyword == null || keyword.isBlank()) && (role == null || role.isBlank())) {
+            users = userService.getAllActiveUsers();
+        } else {
+            users = userService.searchUsers(keyword, role);
+        }
         List<UserResponse> responses = new ArrayList<>();
         for (User user : users) {
             responses.add(userService.buildRespone(user));

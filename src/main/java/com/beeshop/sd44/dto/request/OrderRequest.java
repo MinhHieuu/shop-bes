@@ -1,13 +1,23 @@
 package com.beeshop.sd44.dto.request;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 
 import java.util.List;
 
 public class OrderRequest {
+    @NotEmpty(message = "Gio hang khong duoc de trong")
+    @Valid
     private List<ProductDetailRequest> productDetail;
+
     private String note;
-    private Double total;
+
+    @NotBlank(message = "Phuong thuc thanh toan khong duoc de trong")
     private String paymentMethod;
+
+    private String voucherCode;
+    private String address;
 
     public List<ProductDetailRequest> getProductDetail() {
         return productDetail;
@@ -25,19 +35,27 @@ public class OrderRequest {
         this.note = note;
     }
 
-    public Double getTotal() {
-        return total;
-    }
-
-    public void setTotal(Double total) {
-        this.total = total;
-    }
-
     public String getPaymentMethod() {
         return paymentMethod;
     }
 
     public void setPaymentMethod(String paymentMethod) {
         this.paymentMethod = paymentMethod;
+    }
+
+    public String getVoucherCode() {
+        return voucherCode;
+    }
+
+    public void setVoucherCode(String voucherCode) {
+        this.voucherCode = voucherCode;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 }

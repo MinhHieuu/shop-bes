@@ -9,6 +9,8 @@ public class VoucherResponse {
     private String ten;
     private Integer loaiGiam;
     private Integer toiDa;
+    private Integer toiThieu;
+    private Integer giaTriGiam;
     private Integer trangThai;
     private Date ngayBatDau;
     private Date ngayKetThuc;
@@ -51,6 +53,22 @@ public class VoucherResponse {
 
     public void setToiDa(Integer toiDa) {
         this.toiDa = toiDa;
+    }
+
+    public Integer getToiThieu() {
+        return toiThieu;
+    }
+
+    public void setToiThieu(Integer toiThieu) {
+        this.toiThieu = toiThieu;
+    }
+
+    public Integer getGiaTriGiam() {
+        return giaTriGiam;
+    }
+
+    public void setGiaTriGiam(Integer giaTriGiam) {
+        this.giaTriGiam = giaTriGiam;
     }
 
     public Integer getTrangThai() {

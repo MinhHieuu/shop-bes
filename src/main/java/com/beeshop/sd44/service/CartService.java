@@ -43,25 +43,65 @@ public class CartService {
         return cartDetailRepo.save(cartDetail);
     }
 
+    // B1: Thêm vào giỏ — nếu đã có thì +1 quantity
     public void addProductToCart(UUID productDetailId, UUID userId) {
         Cart cart = getCartByUserId(userId);
         ProductDetail productDetail = productDetailService.getById(productDetailId);
-        CartDetail cartDetail = new CartDetail();
-        cartDetail.setCart(cart);
-        cartDetail.setProductDetail(productDetail);
-        cartDetail.setQuantity(1);
-        cartDetail.setPrice(productDetail.getSalePrice());
-        saveCartDetail(cartDetail);
+        if (productDetail == null) {
+            throw new IllegalArgumentException("San pham khong ton tai");
+        }
+        // Kiểm tra sản phẩm đã có trong giỏ chưa
+        Optional<CartDetail> existing = cartDetailRepo.findByCartAndProductDetail(cart, productDetail);
+        if (existing.isPresent()) {
+            CartDetail cartDetail = existing.get();
+            cartDetail.setQuantity(cartDetail.getQuantity() + 1);
+            saveCartDetail(cartDetail);
+        } else {
+            CartDetail cartDetail = new CartDetail();
+            cartDetail.setCart(cart);
+            cartDetail.setProductDetail(productDetail);
+            cartDetail.setQuantity(1);
+            cartDetail.setPrice(productDetail.getSalePrice());
+            saveCartDetail(cartDetail);
+        }
+    }
+
+    // B2: Cập nhật số lượng sản phẩm trong giỏ
+    public CartDetailResponse updateQuantity(UUID cartDetailId, int quantity, UUID userId) {
+        Cart cart = getCartByUserId(userId);
+        CartDetail cartDetail = cartDetailRepo.findById(cartDetailId)
+                .orElseThrow(() -> new IllegalArgumentException("Khong tim thay san pham trong gio hang"));
+        if (!cartDetail.getCart().getId().equals(cart.getId())) {
+            throw new IllegalArgumentException("San pham khong thuoc gio hang cua ban");
+        }
+        if (quantity <= 0) {
+            cartDetailRepo.delete(cartDetail);
+            return null;
+        }
+        // Kiểm tra không vượt quá tồn kho
+        if (quantity > cartDetail.getProductDetail().getQuantity()) {
+            throw new IllegalArgumentException("So luong vuot qua ton kho (con lai: "
+                    + cartDetail.getProductDetail().getQuantity() + ")");
+        }
+        cartDetail.setQuantity(quantity);
+        return buildResponse(saveCartDetail(cartDetail));
     }
 
     public void removeProductFromCart(UUID cartDetailId, UUID userId) {
         Cart cart = getCartByUserId(userId);
         CartDetail cartDetail = cartDetailRepo.findById(cartDetailId)
-                .orElseThrow(() -> new RuntimeException("Khong tim thay san pham trong gio hang"));
+                .orElseThrow(() -> new IllegalArgumentException("Khong tim thay san pham trong gio hang"));
         if (!cartDetail.getCart().getId().equals(cart.getId())) {
-            throw new RuntimeException("San pham khong thuoc gio hang cua ban");
+            throw new IllegalArgumentException("San pham khong thuoc gio hang cua ban");
         }
         cartDetailRepo.delete(cartDetail);
+    }
+
+    // B2: Clear toàn bộ giỏ hàng
+    public void clearCart(UUID userId) {
+        Cart cart = getCartByUserId(userId);
+        List<CartDetail> cartDetails = cartDetailRepo.findByCart(cart);
+        cartDetailRepo.deleteAll(cartDetails);
     }
 
     public List<CartDetailResponse> getCartDetailByCart(Cart cart) {
@@ -75,10 +115,10 @@ public class CartService {
 
     public CartDetailResponse buildResponse(CartDetail cartDetail) {
         CartDetailResponse response = new CartDetailResponse();
+        response.setId(cartDetail.getId());
         response.setProductDetail(productDetailService.buildResponse(cartDetail.getProductDetail()));
         response.setQuantity(cartDetail.getQuantity());
         response.setTotalPrice(cartDetail.getPrice() * cartDetail.getQuantity());
         return response;
     }
-
 }

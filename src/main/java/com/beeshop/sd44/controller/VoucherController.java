@@ -4,6 +4,7 @@ import com.beeshop.sd44.dto.request.VoucherRequest;
 import com.beeshop.sd44.dto.response.VoucherResponse;
 import com.beeshop.sd44.entity.ApiResponse;
 import com.beeshop.sd44.service.VoucherService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,8 +21,16 @@ public class VoucherController {
     }
 
     @GetMapping("")
-    public ResponseEntity<ApiResponse<List<VoucherResponse>>> getAll() {
-        return ResponseEntity.ok(new ApiResponse<>("lay thanh cong", voucherService.getAll()));
+    public ResponseEntity<ApiResponse<List<VoucherResponse>>> getAll(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Integer trangThai) {
+        List<VoucherResponse> responses;
+        if ((keyword == null || keyword.isBlank()) && trangThai == null) {
+            responses = voucherService.getAll();
+        } else {
+            responses = voucherService.search(keyword, trangThai);
+        }
+        return ResponseEntity.ok(new ApiResponse<>("lay thanh cong", responses));
     }
 
     @GetMapping("{id}")
@@ -34,14 +43,14 @@ public class VoucherController {
     }
 
     @PostMapping("")
-    public ResponseEntity<ApiResponse<VoucherResponse>> create(@RequestBody VoucherRequest request) {
+    public ResponseEntity<ApiResponse<VoucherResponse>> create(@Valid @RequestBody VoucherRequest request) {
         VoucherResponse response = voucherService.create(request);
         return ResponseEntity.status(201).body(new ApiResponse<>("tao moi thanh cong", response));
     }
 
     @PutMapping("{id}")
     public ResponseEntity<ApiResponse<VoucherResponse>> update(@PathVariable("id") UUID id,
-                                                               @RequestBody VoucherRequest request) {
+                                                               @Valid @RequestBody VoucherRequest request) {
         VoucherResponse response = voucherService.update(id, request);
         if (response == null) {
             return ResponseEntity.status(404).body(new ApiResponse<>("khong tim thay", null));

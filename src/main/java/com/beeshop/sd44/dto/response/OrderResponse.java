@@ -11,9 +11,13 @@ public class OrderResponse {
     private Date paymentDate;
     private String paymentMethod;
     private Integer shippingFee;
-    private Double total;
+    private Double subTotal;       // tổng tiền hàng (trước giảm)
+    private Double discount;       // số tiền giảm
+    private Double total;          // tổng thanh toán cuối cùng
     private Integer type;
     private Integer status;
+    private Integer paymentStatus;
+    private String voucherCode;
     private UserResponse userResponse;
     private List<ProductDetailResponse> productDetailResponses;
     // private Integer quantity;
@@ -115,19 +119,35 @@ public class OrderResponse {
         this.paymentMethod = paymentMethod;
     }
 
-    // public Integer getQuantity() {
-    // return quantity;
-    // }
-    //
-    // public void setQuantity(Integer quantity) {
-    // this.quantity = quantity;
-    // }
-    //
-    // public Integer getPrice() {
-    // return price;
-    // }
-    //
-    // public void setPrice(Integer price) {
-    // this.price = price;
-    // }
+    public Double getSubTotal() {
+        return subTotal;
+    }
+
+    public void setSubTotal(Double subTotal) {
+        this.subTotal = subTotal;
+    }
+
+    public Double getDiscount() {
+        return discount;
+    }
+
+    public void setDiscount(Double discount) {
+        this.discount = discount;
+    }
+
+    public Integer getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(Integer paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
+
+    public String getVoucherCode() {
+        return voucherCode;
+    }
+
+    public void setVoucherCode(String voucherCode) {
+        this.voucherCode = voucherCode;
+    }
 }
