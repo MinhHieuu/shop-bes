@@ -1,5 +1,6 @@
 package com.beeshop.sd44.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 
@@ -17,6 +18,7 @@ public class Marterial {
     @Column(name = "ten")
     private String name;
     @OneToMany(mappedBy = "marterial")
+    @JsonIgnore
     private List<Product> list;
 
     public UUID getId() {

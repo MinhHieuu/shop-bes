@@ -1,17 +1,14 @@
 package com.beeshop.sd44.entity;
 
-import org.springframework.http.HttpStatus;
-
-
 import java.time.LocalDateTime;
 
-public class ApiResponse <T> {
+public class ApiResponse<T> {
     private String message;
     private T data;
 
     private LocalDateTime timestamp;
 
-    public ApiResponse( String message, T data ) {
+    public ApiResponse(String message, T data) {
 
         this.message = message;
         this.data = data;

@@ -9,7 +9,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "hoa_don")
 public class Order {
-    private static int sum;
+    private static int sum = 0;
 
     public Order() {
         sum += 1;

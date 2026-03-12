@@ -48,7 +48,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/api/login", "/", "/api/register", "/api/products", "/api/refresh",
-                                "/api/order/momo-callback", "/api/order/vnpay-return")
+                                "/api/order/vnpay-return", "/storage/**")
                         .permitAll()
                         .requestMatchers("/admin/**").hasRole("admin")
                         .anyRequest().authenticated())
@@ -78,7 +78,7 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http:/localhost:3000"));// tên miền được truy cập tới sever
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:5178"));// tên miền được truy cập tới sever
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
         configuration.setAllowCredentials(true);// cho client gửi kèm cookie

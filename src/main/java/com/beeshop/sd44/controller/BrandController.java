@@ -20,7 +20,7 @@ public class BrandController {
     @Autowired
     private BrandService service;
     @GetMapping("thuong-hieu")
-    public ResponseEntity<?> getAll(Model model){
+    public ResponseEntity<?> getAll(){
         List<Brand> list = this.service.getAll();
         return ResponseEntity.ok().body(new ApiResponse<>("lay thanh cong", list));
     }

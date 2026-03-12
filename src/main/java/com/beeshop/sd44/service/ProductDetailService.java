@@ -127,4 +127,16 @@ public class ProductDetailService {
         return listResponse;
     }
 
+    public void updateQuantity(UUID id, int status, int quantity) {
+        ProductDetail productDetail = getById(id);
+        if(productDetail.getQuantity() < quantity) {
+            return;
+        }
+        if(status == 1) {
+            productDetail.setQuantity(productDetail.getQuantity() -1);
+        } else if(status == 5){
+            productDetail.setQuantity(productDetail.getQuantity() + 1);
+        }
+    }
+
 }
