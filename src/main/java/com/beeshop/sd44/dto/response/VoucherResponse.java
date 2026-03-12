@@ -1,15 +1,9 @@
-package com.beeshop.sd44.entity;
-
-import jakarta.persistence.*;
+package com.beeshop.sd44.dto.response;
 
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
-@Entity
-public class Voucher {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+public class VoucherResponse {
     private UUID id;
     private String ma;
     private String ten;
@@ -18,8 +12,6 @@ public class Voucher {
     private Integer trangThai;
     private Date ngayBatDau;
     private Date ngayKetThuc;
-    @OneToMany(mappedBy = "voucher")
-    private List<Order> listOrder;
 
     public UUID getId() {
         return id;
@@ -83,13 +75,5 @@ public class Voucher {
 
     public void setNgayKetThuc(Date ngayKetThuc) {
         this.ngayKetThuc = ngayKetThuc;
-    }
-
-    public List<Order> getListOrder() {
-        return listOrder;
-    }
-
-    public void setListOrder(List<Order> listOrder) {
-        this.listOrder = listOrder;
     }
 }

@@ -6,8 +6,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.List;
 @Repository
 public interface UserRepo extends JpaRepository<User, UUID> {
     Optional<User> getUserByEmail(String email);
     Boolean existsByEmailOrPhone(String email, String phone);
+    List<User> findAllByDeleteFlag(Boolean deleteFlag);
 }

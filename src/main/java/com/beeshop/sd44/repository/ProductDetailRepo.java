@@ -16,6 +16,7 @@ import java.util.UUID;
 public interface ProductDetailRepo extends JpaRepository<ProductDetail, UUID> {
     List<ProductDetail> getProductDetailByDeleteFlag(boolean deleteFlag);
     List<ProductDetail> getProductDetailByName(String name);
+        List<ProductDetail> getProductDetailByProductId(UUID productId);
     Boolean existsByName(String name);
     Boolean existsByProductAndColorAndSize(Product product, Color color, Size size);
     @Query("SELECT pd FROM ProductDetail pd where :name is null or pd.name like %:name% " +

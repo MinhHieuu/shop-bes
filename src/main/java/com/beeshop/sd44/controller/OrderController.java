@@ -4,7 +4,6 @@ import com.beeshop.sd44.dto.request.OrderRequest;
 import com.beeshop.sd44.dto.response.OrderResponse;
 import com.beeshop.sd44.dto.response.VNPayResponse;
 import com.beeshop.sd44.entity.ApiResponse;
-import com.beeshop.sd44.entity.Order;
 import com.beeshop.sd44.service.OrderService;
 import com.beeshop.sd44.service.VNPayService;
 
@@ -67,11 +66,11 @@ public class OrderController {
 
             if ("00".equals(responseCode)) {
                 // Thanh toán thành công
-                Order order = orderService.updatePaymentStatus(UUID.fromString(orderId), 1);
+                orderService.updatePaymentStatus(UUID.fromString(orderId), 1);
                 response.sendRedirect("localhost:8080");
             } else {
                 // Thanh toán thất bại
-                Order order = orderService.updatePaymentStatus(UUID.fromString(orderId), 3); // Status 3: payment failed
+                orderService.updatePaymentStatus(UUID.fromString(orderId), 3); // Status 3: payment failed
                 response.sendRedirect("/api/order/pay");
             }
         } catch (Exception e) {

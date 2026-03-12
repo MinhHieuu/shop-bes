@@ -97,6 +97,15 @@ public class ProductDetailService {
         return listResponse;
     }
 
+    public List<ProductDetailResponse> getListByProductId(UUID productId) {
+        List<ProductDetail> list = this.productDetailRepo.getProductDetailByProductId(productId);
+        List<ProductDetailResponse> listResponse = new ArrayList<>();
+        for (ProductDetail detail : list) {
+            listResponse.add(buildResponse(detail));
+        }
+        return listResponse;
+    }
+
     public List<ProductDetail> getByName(String name) {
         return this.productDetailRepo.getProductDetailByName(name);
     }

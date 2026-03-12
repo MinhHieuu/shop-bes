@@ -1,5 +1,6 @@
 package com.beeshop.sd44.service;
 
+import com.beeshop.sd44.dto.request.EmployeeOrderRequest;
 import com.beeshop.sd44.dto.request.OrderRequest;
 import com.beeshop.sd44.dto.request.ProductDetailRequest;
 import com.beeshop.sd44.dto.response.OrderResponse;
@@ -16,23 +17,36 @@ import java.util.UUID;
 
 @Service
 public class OrderService {
+    private static final int SHIPPING_FEE_DELIVERY = 30000;
     private final OrderRepo orderRepo;
     private final OrderDetailRepo orderDetailRepo;
     private final UserService userService;
     private final ProductDetailService productDetailService;
-    private final CartService cartService;
 
     public OrderService(OrderRepo orderRepo, OrderDetailRepo orderDetailRepo, UserService userService,
-            ProductDetailService productDetailService, CartService cartService) {
+            ProductDetailService productDetailService) {
         this.orderDetailRepo = orderDetailRepo;
         this.orderRepo = orderRepo;
         this.userService = userService;
         this.productDetailService = productDetailService;
-        this.cartService = cartService;
     }
 
     public OrderResponse hanldePlaceOrder(OrderRequest orderRequest, UUID userID) {
         Order order = createOrder(orderRequest, userID);
+        for (ProductDetailRequest pdRequest : orderRequest.getProductDetail()) {
+            ProductDetail productDetail = productDetailService.getById(pdRequest.getId());
+            OrderDetail orderDetail = new OrderDetail();
+            orderDetail.setOrder(order);
+            orderDetail.setProductDetail(productDetail);
+            orderDetail.setQuantity(pdRequest.getQuantity());
+            orderDetail.setPrice(productDetail.getSalePrice());
+            orderDetailRepo.save(orderDetail);
+        }
+        return builresponse(order);
+    }
+
+    public OrderResponse handleCounterOrder(EmployeeOrderRequest orderRequest, UUID employeeId) {
+        Order order = createCounterOrder(orderRequest, employeeId);
         for (ProductDetailRequest pdRequest : orderRequest.getProductDetail()) {
             ProductDetail productDetail = productDetailService.getById(pdRequest.getId());
             OrderDetail orderDetail = new OrderDetail();
@@ -65,6 +79,35 @@ public class OrderService {
         return this.orderRepo.save(order);
     }
 
+    public Order createCounterOrder(EmployeeOrderRequest orderRequest, UUID employeeId) {
+        Order order = new Order();
+        order.setUser(userService.getUserById(employeeId));
+        order.setCreatedAt(new Date());
+        Integer type = orderRequest.getType();
+        if (type == null) {
+            type = 1;
+        }
+        order.setType(type);
+        order.setPaymentDate(new Date());
+        order.setPaymentMethod(orderRequest.getPaymentMethod());
+        order.setNote(orderRequest.getNote());
+        order.setTotal(orderRequest.getTotal());
+        order.setCode("HD" + order.getSum());
+        if (type == 2) {
+            order.setShippingFee(SHIPPING_FEE_DELIVERY);
+        } else {
+            order.setShippingFee(0);
+        }
+        if ("CASH".equals(orderRequest.getPaymentMethod())) {
+            order.setPaymentStatus(1);
+            order.setStatus(1);
+        } else if ("Online".equals(orderRequest.getPaymentMethod())) {
+            order.setPaymentStatus(0);
+            order.setStatus(1);
+        }
+        return this.orderRepo.save(order);
+    }
+
     public Order updatePaymentStatus(UUID orderId, Integer paymentStatus) {
         Order order = getOrderById(orderId);
         if (order != null) {
@@ -88,6 +131,7 @@ public class OrderService {
         response.setCreatedAt(order.getCreatedAt());
         response.setShippingFee(order.getShippingFee());
         response.setTotal(order.getTotal());
+        response.setType(order.getType());
         response.setStatus(order.getStatus());
         response.setUserResponse(userService.buildRespone(userService.getUserById(order.getUser().getId())));
         List<OrderDetail> odList = orderDetailRepo.getOrderDetailByOrder(order);
@@ -98,6 +142,41 @@ public class OrderService {
         response.setProductDetailResponses(listProduct);
         response.setPaymentMethod(order.getPaymentMethod());
         return response;
+    }
+
+    public List<OrderResponse> getOrdersByUserId(UUID userId) {
+        List<Order> orders = orderRepo.findByUserId(userId);
+        List<OrderResponse> responses = new ArrayList<>();
+        for (Order order : orders) {
+            responses.add(builresponse(order));
+        }
+        return responses;
+    }
+
+    public List<OrderResponse> getAllOrders() {
+        List<Order> orders = orderRepo.findAllByOrderByCreatedAtDesc();
+        List<OrderResponse> responses = new ArrayList<>();
+        for (Order order : orders) {
+            responses.add(builresponse(order));
+        }
+        return responses;
+    }
+
+    public OrderResponse getOrderResponseById(UUID orderId) {
+        Order order = getOrderById(orderId);
+        if (order == null) {
+            return null;
+        }
+        return builresponse(order);
+    }
+
+    public Order updateOrderStatus(UUID orderId, Integer status) {
+        Order order = getOrderById(orderId);
+        if (order == null) {
+            return null;
+        }
+        order.setStatus(status);
+        return orderRepo.save(order);
     }
 
     public void handleQuantity(Order order) {

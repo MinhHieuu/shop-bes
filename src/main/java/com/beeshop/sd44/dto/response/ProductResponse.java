@@ -1,6 +1,7 @@
 package com.beeshop.sd44.dto.response;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 public class ProductResponse {
@@ -12,6 +13,7 @@ public class ProductResponse {
     private String brand;
     private Date createdAt;
     private Date updatedAt;
+    private List<ProductDetailResponse> detailList;
     public UUID getId() {
         return id;
     }
@@ -74,5 +76,13 @@ public class ProductResponse {
 
     public Date getUpdatedAt() {
         return this.updatedAt;
+    }
+
+    public List<ProductDetailResponse> getDetailList() {
+        return detailList;
+    }
+
+    public void setDetailList(List<ProductDetailResponse> detailList) {
+        this.detailList = detailList;
     }
 }

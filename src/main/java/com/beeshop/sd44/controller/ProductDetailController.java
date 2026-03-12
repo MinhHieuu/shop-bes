@@ -3,7 +3,6 @@ package com.beeshop.sd44.controller;
 import com.beeshop.sd44.dto.request.ProductDetailRequest;
 import com.beeshop.sd44.dto.response.ProductDetailResponse;
 import com.beeshop.sd44.entity.*;
-import com.beeshop.sd44.service.ImageService;
 import com.beeshop.sd44.service.ProductDetailService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -19,15 +18,22 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/admin/product-detail")
 public class ProductDetailController {
     private final ProductDetailService productDetailService;
-    private final ImageService imageService;
-    public ProductDetailController(ProductDetailService productDetailService, ImageService imageService) {
+    public ProductDetailController(ProductDetailService productDetailService) {
         this.productDetailService = productDetailService;
-        this.imageService = imageService;
     }
     @GetMapping("")
     public ResponseEntity<ApiResponse<List<ProductDetailResponse>>> getListProductDetail() {
         List<ProductDetailResponse> list = this.productDetailService.getListDetail(false);
         return ResponseEntity.ok().body(new ApiResponse<>("lay thanh cong", list));
+    }
+
+    @GetMapping("{id}")
+    public ResponseEntity<ApiResponse<ProductDetailResponse>> getDetailById(@PathVariable("id") UUID id) {
+        ProductDetail detail = this.productDetailService.getById(id);
+        if (detail == null) {
+            return ResponseEntity.status(404).body(new ApiResponse<>("khong tim thay san pham", null));
+        }
+        return ResponseEntity.ok().body(new ApiResponse<>("lay thanh cong", this.productDetailService.buildResponse(detail)));
     }
 
     @PostMapping

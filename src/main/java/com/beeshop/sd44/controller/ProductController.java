@@ -4,10 +4,8 @@ import com.beeshop.sd44.dto.request.ProductRequest;
 import com.beeshop.sd44.dto.response.ProductResponse;
 import com.beeshop.sd44.entity.ApiResponse;
 import com.beeshop.sd44.entity.Product;
-import com.beeshop.sd44.service.MarterialService;
-import com.beeshop.sd44.service.FileService;
+import com.beeshop.sd44.service.ProductDetailService;
 import com.beeshop.sd44.service.ProductService;
-import com.beeshop.sd44.service.BrandService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -15,29 +13,36 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/admin")
 public class ProductController {
     private final ProductService productService;
-    private final BrandService brandService;
-    private final MarterialService marterialService;
-    private final FileService fileService;
+    private final ProductDetailService productDetailService;
 
     public ProductController(ProductService productService,
-                             BrandService brandService,
-                             MarterialService marterialService, FileService fileService) {
+                             ProductDetailService productDetailService) {
         this.productService = productService;
-        this.brandService = brandService;
-        this.marterialService = marterialService;
-        this.fileService = fileService;
+        this.productDetailService = productDetailService;
     }
 
     @GetMapping("san-pham")
     public ResponseEntity<?> getAllProduct() {
         List<ProductResponse> list = this.productService.getAll();
         return ResponseEntity.ok(new ApiResponse<>("lay thanh cong", list));
+    }
+
+    @GetMapping("san-pham/{id}")
+    public ResponseEntity<ApiResponse<ProductResponse>> getProductDetail(@PathVariable("id") UUID id) {
+        Product product = this.productService.getById(id);
+        if (product == null) {
+            return ResponseEntity.status(404).body(new ApiResponse<>("khong tim thay san pham", null));
+        }
+        ProductResponse response = this.productService.hanldeResponse(product);
+        response.setDetailList(this.productDetailService.getListByProductId(id));
+        return ResponseEntity.ok(new ApiResponse<>("lay thanh cong", response));
     }
 
     @PostMapping("san-pham")

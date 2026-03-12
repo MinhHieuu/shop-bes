@@ -50,7 +50,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/login", "/", "/api/register", "/api/products", "/api/refresh",
                                 "/api/order/vnpay-return", "/storage/**")
                         .permitAll()
-                        .requestMatchers("/admin/**").hasRole("admin")
+                    .requestMatchers("/api/admin/**").hasRole("admin")
+                    .requestMatchers("/api/employee/**").hasAnyRole("employee", "admin")
+                    .requestMatchers("/api/user/**").hasRole("user")
                         .anyRequest().authenticated())
                 .logout(logout -> logout.disable())
                 .oauth2ResourceServer(

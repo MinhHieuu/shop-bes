@@ -163,7 +163,7 @@ public class Order {
     }
 
     public int getSum() {
-        return this.sum;
+        return sum;
     }
 
     public Integer getPaymentStatus() {

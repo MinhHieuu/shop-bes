@@ -54,6 +54,16 @@ public class CartService {
         saveCartDetail(cartDetail);
     }
 
+    public void removeProductFromCart(UUID cartDetailId, UUID userId) {
+        Cart cart = getCartByUserId(userId);
+        CartDetail cartDetail = cartDetailRepo.findById(cartDetailId)
+                .orElseThrow(() -> new RuntimeException("Khong tim thay san pham trong gio hang"));
+        if (!cartDetail.getCart().getId().equals(cart.getId())) {
+            throw new RuntimeException("San pham khong thuoc gio hang cua ban");
+        }
+        cartDetailRepo.delete(cartDetail);
+    }
+
     public List<CartDetailResponse> getCartDetailByCart(Cart cart) {
         List<CartDetailResponse> responses = new ArrayList<>();
         List<CartDetail> cartDetails = cartDetailRepo.findByCart(cart);
