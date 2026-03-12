@@ -9,7 +9,9 @@ public class ProductResponse {
     private String name;
     private String image;
     private String status;
+    private UUID marterialId;
     private String marterial;
+    private UUID brandId;
     private String brand;
     private Date createdAt;
     private Date updatedAt;
@@ -46,12 +48,28 @@ public class ProductResponse {
         this.status = status;
     }
 
+    public UUID getMarterialId() {
+        return marterialId;
+    }
+
+    public void setMarterialId(UUID marterialId) {
+        this.marterialId = marterialId;
+    }
+
     public String getMarterial() {
         return marterial;
     }
 
     public void setMarterial(String marterial) {
         this.marterial = marterial;
+    }
+
+    public UUID getBrandId() {
+        return brandId;
+    }
+
+    public void setBrandId(UUID brandId) {
+        this.brandId = brandId;
     }
 
     public String getBrand() {

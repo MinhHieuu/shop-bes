@@ -47,8 +47,11 @@ public class ProductDetailService {
         response.setQuantity(detail.getQuantity());
         response.setCostPrice(detail.getCostPrice());
         response.setSalePrice(detail.getSalePrice());
+        response.setProductId(detail.getProduct().getId());
         response.setProductName(detail.getProduct().getName());
+        response.setSizeId(detail.getSize().getId());
         response.setSizeName(detail.getSize().getName());
+        response.setColorId(detail.getColor().getId());
         response.setColorName(detail.getColor().getName());
         response.setImages(this.getImages(detail));
         return response;

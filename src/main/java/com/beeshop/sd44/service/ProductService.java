@@ -45,7 +45,9 @@ public class ProductService {
         ProductResponse response = new ProductResponse();
         response.setId(product.getId());
         response.setName(product.getName());
+        response.setBrandId(product.getBrand().getId());
         response.setBrand(product.getBrand().getName());
+        response.setMarterialId(product.getMarterial().getId());
         response.setMarterial(product.getMarterial().getName());
         response.setCreatedAt(product.getCreatedAt());
         response.setImage(product.getImage());

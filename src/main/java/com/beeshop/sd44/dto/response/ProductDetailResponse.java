@@ -11,8 +11,11 @@ public class ProductDetailResponse {
     private Double costPrice;
     private Double salePrice;
     private boolean deleteFlag;
+    private UUID productId;
     private String productName;
+    private UUID sizeId;
     private String sizeName;
+    private UUID colorId;
     private String colorName;
     private List<String> images;
 
@@ -72,6 +75,14 @@ public class ProductDetailResponse {
         this.deleteFlag = deleteFlag;
     }
 
+    public UUID getProductId() {
+        return productId;
+    }
+
+    public void setProductId(UUID productId) {
+        this.productId = productId;
+    }
+
     public String getProductName() {
         return productName;
     }
@@ -80,12 +91,28 @@ public class ProductDetailResponse {
         this.productName = productName;
     }
 
+    public UUID getSizeId() {
+        return sizeId;
+    }
+
+    public void setSizeId(UUID sizeId) {
+        this.sizeId = sizeId;
+    }
+
     public String getSizeName() {
         return sizeName;
     }
 
     public void setSizeName(String sizeName) {
         this.sizeName = sizeName;
+    }
+
+    public UUID getColorId() {
+        return colorId;
+    }
+
+    public void setColorId(UUID colorId) {
+        this.colorId = colorId;
     }
 
     public String getColorName() {
