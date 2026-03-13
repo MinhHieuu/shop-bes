@@ -6,6 +6,7 @@ import com.beeshop.sd44.dto.response.VNPayResponse;
 import com.beeshop.sd44.dto.response.VoucherApplyResponse;
 import com.beeshop.sd44.entity.ApiResponse;
 import com.beeshop.sd44.entity.Voucher;
+import com.beeshop.sd44.service.InvoicePdfService;
 import com.beeshop.sd44.service.OrderService;
 import com.beeshop.sd44.service.VNPayService;
 import com.beeshop.sd44.service.VoucherService;
@@ -14,6 +15,9 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -28,11 +32,14 @@ public class OrderController {
     private final OrderService orderService;
     private final VNPayService vnPayService;
     private final VoucherService voucherService;
+    private final InvoicePdfService invoicePdfService;
 
-    public OrderController(OrderService orderService, VNPayService vnPayService, VoucherService voucherService) {
+    public OrderController(OrderService orderService, VNPayService vnPayService,
+                           VoucherService voucherService, InvoicePdfService invoicePdfService) {
         this.orderService = orderService;
         this.vnPayService = vnPayService;
         this.voucherService = voucherService;
+        this.invoicePdfService = invoicePdfService;
     }
 
     /**
@@ -99,6 +106,24 @@ public class OrderController {
             orderService.updatePaymentStatus(UUID.fromString(orderId), 3);
             response.sendRedirect("http://localhost:3000/order-error");
         }
+    }
+
+    /**
+     * In hóa đơn PDF theo orderId.
+     * GET /api/order/{id}/invoice
+     * Trả về file PDF với header Content-Disposition: attachment
+     */
+    @GetMapping("{id}/invoice")
+    public ResponseEntity<byte[]> printInvoice(@PathVariable UUID id) throws IOException {
+        byte[] pdfBytes = invoicePdfService.generateInvoicePdf(id);
+        if (pdfBytes == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData("attachment", "invoice-" + id + ".pdf");
+        headers.setContentLength(pdfBytes.length);
+        return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
     }
 
 }
