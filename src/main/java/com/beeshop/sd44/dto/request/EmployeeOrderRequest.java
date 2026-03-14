@@ -8,7 +8,9 @@ public class EmployeeOrderRequest {
     private Double total;
     private String paymentMethod;
     private Integer type;
-
+    private String phoneNumber;
+    private String voucherCode;
+    
     public List<ProductDetailRequest> getProductDetail() {
         return productDetail;
     }
@@ -47,5 +49,21 @@ public class EmployeeOrderRequest {
 
     public void setType(Integer type) {
         this.type = type;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getVoucherCode() {
+        return voucherCode;
+    }
+
+    public void setVoucherCode(String voucherCode) {
+        this.voucherCode = voucherCode;
     }
 }

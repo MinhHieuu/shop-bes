@@ -114,6 +114,12 @@
             <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
         </dependency>
 
+        <!-- WebSocket - realtime notifications -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
+
         <!-- iText 7 - tạo file PDF hóa đơn -->
         <dependency>
             <groupId>com.itextpdf</groupId>

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestControllerAdvice
@@ -15,19 +16,24 @@ public class GlobalExceptionHandler {
 
     // Bắt lỗi @Valid trên @RequestBody (MethodArgumentNotValidException)
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<Map<String, String>>> handleValidation(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new LinkedHashMap<>();
+    public ResponseEntity<ApiResponse<?>> handleValidation(MethodArgumentNotValidException ex) {
+        List<String> errors = new java.util.ArrayList<>(ex.getBindingResult().getAllErrors()
+                .stream()
+                .map(err -> err.getDefaultMessage())
+                .toList());
+        List<String> customErrors = ex.getBindingResult().getAllErrors()
+                .stream()
+                .filter(err -> err.getDefaultMessage() != null && err.getDefaultMessage().startsWith("CustomError:"))
+                .map(err -> err.getDefaultMessage().substring("CustomError:".length()))
+                .toList();
+        errors.addAll(customErrors);
+        StringBuilder errorMessage = new StringBuilder();
 
-        // Field-level errors (ví dụ: @NotBlank, @Min, @Max ...)
-        ex.getBindingResult().getFieldErrors()
-                .forEach(err -> errors.put(err.getField(), err.getDefaultMessage()));
-
-        // Class-level errors (ví dụ: custom @ToiDaHopLe)
-        ex.getBindingResult().getGlobalErrors()
-                .forEach(err -> errors.put(err.getObjectName(), err.getDefaultMessage()));
-
+        for(String error : errors) {
+            errorMessage.append(error).append("\n");
+        }
         return ResponseEntity.badRequest()
-                .body(new ApiResponse<>("Du lieu khong hop le", errors));
+                .body(new ApiResponse<>("Du lieu khong hop le", errorMessage));
     }
 
     // Bắt IllegalArgumentException từ service

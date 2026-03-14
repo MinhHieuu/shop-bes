@@ -48,9 +48,10 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/api/login", "/", "/api/register", "/api/products", "/api/refresh",
-                                "/api/order/vnpay-return", "/api/order/check-voucher", "/storage/**", "/images/**")
+                                "/api/order/vnpay-return", "/api/order/check-voucher", "/storage/**", "/images/**",
+                                "/ws/**", "/api/notifications", "/api/notifications/**")
                         .permitAll()
-                    .requestMatchers("/api/admin/**").hasRole("admin")
+                    .requestMatchers("/api/admin/**").hasAnyRole("employee", "admin", "user")
                     .requestMatchers("/api/employee/**").hasAnyRole("employee", "admin")
                     .requestMatchers("/api/user/**").hasRole("user")
                         .anyRequest().authenticated())

@@ -25,11 +25,13 @@ public class EmployeeOrderController {
     @PostMapping("")
     public ResponseEntity<ApiResponse<OrderResponse>> createOrder(@RequestBody EmployeeOrderRequest request,
                                                                   Authentication authentication) {
-        if (!"CASH".equals(request.getPaymentMethod())) {
-            return ResponseEntity.badRequest().body(new ApiResponse<>("chi ho tro thanh toan tien mat", null));
-        }
+//        if (!"CASH".equals(request.getPaymentMethod())) {
+//            return ResponseEntity.badRequest().body(new ApiResponse<>("chi ho tro thanh toan tien mat", null));
+//        }
         UUID employeeId = UUID.fromString(authentication.getName());
         OrderResponse response = orderService.handleCounterOrder(request, employeeId);
+        System.out.println("employee - ship: ");
+
         return ResponseEntity.status(201).body(new ApiResponse<>("tao don hang thanh cong", response));
     }
 
@@ -76,7 +78,8 @@ public class EmployeeOrderController {
 
     @PutMapping("{id}/status")
     public ResponseEntity<ApiResponse<OrderResponse>> updateStatus(@PathVariable("id") UUID id,
-                                                                   @RequestParam("status") Integer status) {
+                                                                   @RequestParam("status") Integer status,
+                                                                   Authentication authentication) {
         if (status == null) {
             return ResponseEntity.badRequest().body(new ApiResponse<>("thieu trang thai", null));
         }
@@ -84,7 +87,8 @@ public class EmployeeOrderController {
         if (response == null) {
             return ResponseEntity.status(404).body(new ApiResponse<>("khong tim thay", null));
         }
-        orderService.updateOrderStatus(id, status);
+        UUID operatorId = UUID.fromString(authentication.getName());
+        orderService.updateOrderStatus(id, status, operatorId);
         return ResponseEntity.ok(new ApiResponse<>("cap nhat thanh cong", orderService.getOrderResponseById(id)));
     }
 }

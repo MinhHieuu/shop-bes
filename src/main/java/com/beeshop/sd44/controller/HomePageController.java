@@ -1,7 +1,9 @@
 package com.beeshop.sd44.controller;
 
+import ch.qos.logback.core.util.StringUtil;
 import com.beeshop.sd44.dto.response.CartDetailResponse;
 import com.beeshop.sd44.dto.response.ProductDetailResponse;
+import com.beeshop.sd44.dto.response.ProductSale;
 import com.beeshop.sd44.entity.ApiResponse;
 import com.beeshop.sd44.service.CartService;
 import com.beeshop.sd44.service.ProductDetailService;
@@ -28,6 +30,22 @@ public class HomePageController {
         List<ProductDetailResponse> list = this.productDetailService.getListDetail(false);
         return ResponseEntity.ok().body(new ApiResponse<>("lay thanh cong", list));
     }
+    @GetMapping("/sale")
+    public ResponseEntity<ApiResponse<List<ProductSale>>> getHomePageSale(@RequestParam(required = false) String id) {
+        List<ProductSale> list;
+        if(StringUtil.isNullOrEmpty(id)){
+            list = this.productDetailService.getListSaler(null);
+        }else{
+            list = this.productDetailService.getListSaler(id);
+        }
+        return ResponseEntity.ok().body(new ApiResponse<>("lay thanh cong", list));
+    }
+    @GetMapping("/sale/{id}")
+    public ResponseEntity<ApiResponse<List<ProductSale>>> getHomePageSaleByProductId(@PathVariable("id") String id) {
+        List<ProductSale> list = this.productDetailService.getListSalerByProductId(id);
+        return ResponseEntity.ok().body(new ApiResponse<>("lay thanh cong", list));
+    }
+
 
     // B2: Lấy giỏ hàng
     @GetMapping("cart")

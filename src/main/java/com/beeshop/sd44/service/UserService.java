@@ -3,6 +3,8 @@ package com.beeshop.sd44.service;
 import com.beeshop.sd44.dto.response.UserResponse;
 import com.beeshop.sd44.entity.User;
 import com.beeshop.sd44.repository.UserRepo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,8 +14,15 @@ import java.util.UUID;
 @Service
 public class UserService {
     private final UserRepo userRepo;
+    private CustomerService customerService;
+
     public UserService(UserRepo userRepo) {
         this.userRepo = userRepo;
+    }
+
+    @Autowired
+    public void setCustomerService(@Lazy CustomerService customerService) {
+        this.customerService = customerService;
     }
 
     public User getByEmail(String email) {
@@ -24,8 +33,15 @@ public class UserService {
         return null;
     }
 
+    /**
+     * Tạo user và nếu role = "user" thì tự động tạo Customer liên kết
+     */
     public User createUser(User user) {
-       return this.userRepo.save(user);
+        User savedUser = this.userRepo.save(user);
+        if ("user".equals(savedUser.getRole())) {
+            customerService.createCustomerForUser(savedUser);
+        }
+        return savedUser;
     }
 
     public Boolean isUserExit(String email, String phone) {
@@ -85,6 +101,7 @@ public class UserService {
         response.setPhone(user.getPhone());
         response.setAddress(user.getAddress());
         response.setRole(user.getRole());
+        response.setAvatar(user.getAvatar());
         return response;
     }
 }

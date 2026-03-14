@@ -1,11 +1,9 @@
 package com.beeshop.sd44.dto.request;
 
-import com.beeshop.sd44.dto.request.validation.ToiDaHopLe;
 import jakarta.validation.constraints.*;
 
 import java.util.Date;
 
-@ToiDaHopLe
 public class VoucherRequest {
 
     @NotBlank(message = "Mã voucher không được để trống")
@@ -15,16 +13,12 @@ public class VoucherRequest {
     private String ten;
 
     @NotNull(message = "Loại giảm không được để trống")
-    @Min(value = 0, message = "Loại giảm phải là 0 (theo %) hoặc 1 (theo tiền)")
-    @Max(value = 1, message = "Loại giảm phải là 0 (theo %) hoặc 1 (theo tiền)")
     private Integer loaiGiam;
 
     @NotNull(message = "Giá trị giảm không được để trống")
-    @Min(value = 1, message = "Giá trị giảm phải lớn hơn 0")
     private Integer giaTriGiam;
 
     @NotNull(message = "Giá trị tối thiểu không được để trống")
-    @Min(value = 0, message = "Giá trị tối thiểu không được âm")
     private Integer toiThieu;
 
     // nullable — nếu có thì phải >= toiThieu (kiểm tra bằng @ToiDaHopLe)
@@ -32,16 +26,11 @@ public class VoucherRequest {
     private Integer toiDa;
 
     @NotNull(message = "Trạng thái không được để trống")
-    @Min(value = 0, message = "Trạng thái không hợp lệ")
-    @Max(value = 1, message = "Trạng thái không hợp lệ")
+
     private Integer trangThai;
 
-    @NotNull(message = "Ngày bắt đầu không được để trống")
-    @FutureOrPresent(message = "Ngày bắt đầu không được ở quá khứ")
     private Date ngayBatDau;
 
-    @NotNull(message = "Ngày kết thúc không được để trống")
-    @Future(message = "Ngày kết thúc phải ở tương lai")
     private Date ngayKetThuc;
 
     public String getMa() {

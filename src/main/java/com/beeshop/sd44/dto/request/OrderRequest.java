@@ -1,5 +1,7 @@
 package com.beeshop.sd44.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -18,6 +20,19 @@ public class OrderRequest {
 
     private String voucherCode;
     private String address;
+
+    @JsonProperty("isCounter")
+    @JsonAlias("counter")
+    private boolean counter;
+
+
+    public boolean isCounter() {
+        return counter;
+    }
+
+    public void setCounter(boolean counter) {
+        this.counter = counter;
+    }
 
     public List<ProductDetailRequest> getProductDetail() {
         return productDetail;

@@ -77,13 +77,11 @@ public class UserProfileController {
     public ResponseEntity<ApiResponse<OrderResponse>> getOrderDetail(Authentication authentication,
                                                                      @PathVariable("id") UUID orderId) {
         UUID userId = UUID.fromString(authentication.getName());
-        Order order = orderService.getOrderById(orderId);
+        Order order = orderService.getMyOrderById(orderId, userId);
         if (order == null) {
             return ResponseEntity.status(404).body(new ApiResponse<>("khong tim thay", null));
         }
-        if (!order.getUser().getId().equals(userId)) {
-            return ResponseEntity.status(403).body(new ApiResponse<>("khong co quyen", null));
-        }
+
         return ResponseEntity.ok(new ApiResponse<>("lay thanh cong", orderService.getOrderResponseById(orderId)));
     }
 }

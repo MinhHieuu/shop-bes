@@ -5,8 +5,12 @@ import com.beeshop.sd44.dto.response.OrderResponse;
 import com.beeshop.sd44.dto.response.VNPayResponse;
 import com.beeshop.sd44.dto.response.VoucherApplyResponse;
 import com.beeshop.sd44.entity.ApiResponse;
+import com.beeshop.sd44.entity.Customer;
+import com.beeshop.sd44.entity.Order;
 import com.beeshop.sd44.entity.Voucher;
+import com.beeshop.sd44.service.CustomerService;
 import com.beeshop.sd44.service.InvoicePdfService;
+import com.beeshop.sd44.service.NotificationService;
 import com.beeshop.sd44.service.OrderService;
 import com.beeshop.sd44.service.VNPayService;
 import com.beeshop.sd44.service.VoucherService;
@@ -23,6 +27,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -33,13 +38,18 @@ public class OrderController {
     private final VNPayService vnPayService;
     private final VoucherService voucherService;
     private final InvoicePdfService invoicePdfService;
+    private final CustomerService customerService;
+    private final NotificationService notificationService;
 
     public OrderController(OrderService orderService, VNPayService vnPayService,
-                           VoucherService voucherService, InvoicePdfService invoicePdfService) {
+                           VoucherService voucherService, InvoicePdfService invoicePdfService,
+                           CustomerService customerService, NotificationService notificationService) {
         this.orderService = orderService;
         this.vnPayService = vnPayService;
         this.voucherService = voucherService;
         this.invoicePdfService = invoicePdfService;
+        this.customerService = customerService;
+        this.notificationService = notificationService;
     }
 
     /**
@@ -100,6 +110,18 @@ public class OrderController {
         if ("00".equals(responseCode)) {
             // Thanh toán thành công
             orderService.updatePaymentStatus(UUID.fromString(orderId), 1);
+
+            // Bắn thông báo VNPAY thanh toán thành công
+            Order paidOrder = orderService.getOrderById(UUID.fromString(orderId));
+            if (paidOrder != null) {
+                notificationService.createAndBroadcast(
+                        "Thanh toán VNPAY thành công",
+                        "Đơn hàng #" + paidOrder.getCode() + " đã được thanh toán qua VNPAY",
+                        paidOrder.getId(),
+                        "VNPAY_SUCCESS"
+                );
+            }
+
             response.sendRedirect("http://localhost:3000/order-success");
         } else {
             // Thanh toán thất bại
@@ -124,6 +146,22 @@ public class OrderController {
         headers.setContentDispositionFormData("attachment", "invoice-" + id + ".pdf");
         headers.setContentLength(pdfBytes.length);
         return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
+    }
+
+    /**
+     * Lấy danh sách đơn hàng của user đang đăng nhập (role=user).
+     * GET /api/order/my-orders
+     * Dùng khach_hang_id để tìm kiếm thay vì nguoi_dung_id.
+     */
+    @GetMapping("my-orders")
+    public ResponseEntity<ApiResponse<List<OrderResponse>>> getMyOrders(Authentication authentication) {
+        UUID userId = UUID.fromString(authentication.getName());
+        Customer customer = customerService.getByUserId(userId);
+        if (customer == null) {
+            return ResponseEntity.status(404).body(new ApiResponse<>("khong tim thay thong tin khach hang", null));
+        }
+        List<OrderResponse> orders = orderService.getOrdersByCustomerId(customer.getId());
+        return ResponseEntity.ok(new ApiResponse<>("lay thanh cong", orders));
     }
 
 }

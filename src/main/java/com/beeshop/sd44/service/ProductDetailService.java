@@ -2,8 +2,10 @@ package com.beeshop.sd44.service;
 
 import com.beeshop.sd44.dto.request.ProductDetailRequest;
 import com.beeshop.sd44.dto.response.ProductDetailResponse;
+import com.beeshop.sd44.dto.response.ProductSale;
 import com.beeshop.sd44.entity.*;
 import com.beeshop.sd44.repository.ImageRepo;
+import com.beeshop.sd44.repository.OrderRepo;
 import com.beeshop.sd44.repository.ProductDetailRepo;
 
 import jakarta.transaction.Transactional;
@@ -23,9 +25,9 @@ public class ProductDetailService {
     private final SizeService sizeService;
     private final ImageService imageService;
     private final ImageRepo imageRepo;
-
+    private final OrderRepo orderRepo;
     public ProductDetailService(ProductDetailRepo productDetailRepo, ProductService productService,
-            ColorService colorService, SizeService sizeService, ImageRepo imageRepo,
+            ColorService colorService, SizeService sizeService, ImageRepo imageRepo, OrderRepo orderRepo,
             ImageService imageService) {
         this.productDetailRepo = productDetailRepo;
         this.productService = productService;
@@ -33,6 +35,7 @@ public class ProductDetailService {
         this.sizeService = sizeService;
         this.imageService = imageService;
         this.imageRepo = imageRepo;
+        this.orderRepo = orderRepo;
     }
 
     public List<ProductDetailResponse> getAll() {
@@ -43,7 +46,12 @@ public class ProductDetailService {
         }
         return responseList;
     }
-
+    public List<ProductSale> getListSaler(String productId) {
+        return this.orderRepo.getListSaler(productId);
+    }
+    public List<ProductSale> getListSalerByProductId(String productId) {
+        return this.orderRepo.getListSalerByProductId(productId);
+    }
     public ProductDetailResponse buildResponse(ProductDetail detail) {
         ProductDetailResponse response = new ProductDetailResponse();
         response.setId(detail.getId());
