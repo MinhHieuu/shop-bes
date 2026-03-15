@@ -122,11 +122,11 @@ public class OrderController {
                 );
             }
 
-            response.sendRedirect("http://localhost:3000/order-success");
+            response.sendRedirect("http://localhost:3000/order/success");
         } else {
             // Thanh toán thất bại
             orderService.updatePaymentStatus(UUID.fromString(orderId), 3);
-            response.sendRedirect("http://localhost:3000/order-error");
+            response.sendRedirect("http://localhost:3000/order/error");
         }
     }
 

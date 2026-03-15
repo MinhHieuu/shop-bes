@@ -8,4 +8,6 @@ public interface ProductSale {
     String getTen();
 
     Long getTong();
+    String getAnh();
+    String getGia();
 }

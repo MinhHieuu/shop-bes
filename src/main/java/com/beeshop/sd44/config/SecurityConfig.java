@@ -31,6 +31,12 @@ public class SecurityConfig {
     @Value("${jwt.secret}")
     private String secretKey;
 
+    private String[] whiteList = new String[]{
+            "/api/login", "/","/product/**", "/api/register", "/api/products", "/api/refresh",
+            "/api/order/vnpay-return", "/api/order/check-voucher", "/storage/**", "/images/**",
+            "/sale", "/sale/**", "/api/admin/size", "/api/admin/chat-lieu", "/api/admin/thuong-hieu",
+            "/ws/**", "/api/notifications", "/api/notifications/**"
+    };
     @Bean
     public PasswordEncoder encoder() {
         return new BCryptPasswordEncoder();
@@ -47,9 +53,7 @@ public class SecurityConfig {
                 .csrf(c -> c.disable())
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/api/login", "/", "/api/register", "/api/products", "/api/refresh",
-                                "/api/order/vnpay-return", "/api/order/check-voucher", "/storage/**", "/images/**",
-                                "/ws/**", "/api/notifications", "/api/notifications/**")
+                        .requestMatchers(whiteList)
                         .permitAll()
                     .requestMatchers("/api/admin/**").hasAnyRole("employee", "admin", "user")
                     .requestMatchers("/api/employee/**").hasAnyRole("employee", "admin")

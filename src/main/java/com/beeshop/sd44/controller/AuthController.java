@@ -31,7 +31,7 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) throws EntityNotFoundException {
         LoginResponse response = this.authService.login(loginRequest);
         if (response == null) {
-            return ResponseEntity.status(401).body(new ApiResponse<>("sai email hoac mat khau", null));
+            return ResponseEntity.status(400).body(new ApiResponse<>("sai email hoac mat khau", null));
         }
 
         return ResponseEntity.ok()

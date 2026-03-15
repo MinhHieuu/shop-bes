@@ -35,14 +35,15 @@ public interface OrderRepo extends JpaRepository<Order, UUID> {
 	);
 
 	@Query(value = """
-		Select BIN_TO_UUID(sp.id) as id, sp.ten, SUM(hdt.so_luong ) as tong
+		Select BIN_TO_UUID(sp.id) as id, sp.ten, SUM(hdt.so_luong ) as tong, sp.hinh_anh as anh
+
 		  FROM san_pham sp
 		  JOIN san_pham_chi_tiet st ON st.san_pham_id = sp.id
 		  JOIN hoa_don_chi_tiet hdt ON hdt.san_pham_chi_tiet_id  = st.id 
 		  Where sp.trang_thai = 1 AND  (:productId IS NULL OR sp.id = UUID_TO_BIN(:productId))
 		  GROUP BY sp.id, sp.ten
 		  ORDER BY tong desc
-		  LIMIT 5
+		  LIMIT 10
 """, nativeQuery = true)
 	List<ProductSale> getListSaler(String productId);
 
