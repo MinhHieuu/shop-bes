@@ -8,6 +8,7 @@ import com.beeshop.sd44.entity.ApiResponse;
 import com.beeshop.sd44.entity.User;
 import com.beeshop.sd44.service.AuthService;
 
+import com.beeshop.sd44.service.CustomerService;
 import com.beeshop.sd44.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.ResponseEntity;
@@ -20,11 +21,12 @@ public class AuthController {
     private final AuthService authService;
     private final PasswordEncoder passwordEncoder;
     private final UserService userService;
-
-    public AuthController(AuthService authService, PasswordEncoder passwordEncoder, UserService userService) {
+    private final CustomerService customerService;
+    public AuthController(AuthService authService, PasswordEncoder passwordEncoder, UserService userService, CustomerService customerService) {
         this.passwordEncoder = passwordEncoder;
         this.authService = authService;
         this.userService = userService;
+        this.customerService = customerService;
     }
 
     @PostMapping("login")
@@ -69,5 +71,10 @@ public class AuthController {
         user.setDeleteFlag(false);
         UserResponse response = this.userService.buildRespone(userService.createUser(user));
         return ResponseEntity.status(201).body(new ApiResponse<>("tao moi thanh cong", response));
+    }
+
+    @GetMapping("check-customer")
+    public ResponseEntity<?> checkCustomer(@RequestParam String phone) {
+        return ResponseEntity.ok().body(new ApiResponse<>("kiem tra thanh cong", customerService.checkCustomer(phone)));
     }
 }

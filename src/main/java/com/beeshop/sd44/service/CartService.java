@@ -44,26 +44,28 @@ public class CartService {
     }
 
     // B1: Thêm vào giỏ — nếu đã có thì +1 quantity
-    public void addProductToCart(UUID productDetailId, UUID userId) {
+    public void addProductToCart(UUID productDetailId, UUID userId, Integer quantity) {
         Cart cart = getCartByUserId(userId);
+
         ProductDetail productDetail = productDetailService.getById(productDetailId);
         if (productDetail == null) {
             throw new IllegalArgumentException("San pham khong ton tai");
         }
         // Kiểm tra sản phẩm đã có trong giỏ chưa
-        Optional<CartDetail> existing = cartDetailRepo.findByCartAndProductDetail(cart, productDetail);
+        Optional<CartDetail> existing = cartDetailRepo.findByCartIdAndProductDetailId(cart.getId(), productDetail.getId());
         if (existing.isPresent()) {
             CartDetail cartDetail = existing.get();
-            cartDetail.setQuantity(cartDetail.getQuantity() + 1);
+            cartDetail.setQuantity(cartDetail.getQuantity() + quantity);
             saveCartDetail(cartDetail);
         } else {
             CartDetail cartDetail = new CartDetail();
             cartDetail.setCart(cart);
             cartDetail.setProductDetail(productDetail);
-            cartDetail.setQuantity(1);
+            cartDetail.setQuantity(quantity);
             cartDetail.setPrice(productDetail.getSalePrice());
             saveCartDetail(cartDetail);
         }
+        System.out.println("a");
     }
 
     // B2: Cập nhật số lượng sản phẩm trong giỏ

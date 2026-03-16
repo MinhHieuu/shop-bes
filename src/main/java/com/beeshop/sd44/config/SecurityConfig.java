@@ -32,7 +32,7 @@ public class SecurityConfig {
     private String secretKey;
 
     private String[] whiteList = new String[]{
-            "/api/login", "/","/product/**", "/api/register", "/api/products", "/api/refresh",
+            "/api/login","/api/check-customer", "/","/product/**", "/api/register", "/api/products", "/api/refresh",
             "/api/order/vnpay-return", "/api/order/check-voucher", "/storage/**", "/images/**",
             "/sale", "/sale/**", "/api/admin/size", "/api/admin/chat-lieu", "/api/admin/thuong-hieu",
             "/ws/**", "/api/notifications", "/api/notifications/**"

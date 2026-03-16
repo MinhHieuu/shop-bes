@@ -21,7 +21,16 @@ public class CustomerService {
      * Tạo Customer liên kết với User (dùng khi đăng ký hoặc admin tạo user có role=user)
      */
     public Customer createCustomerForUser(User user) {
-        Customer customer = new Customer();
+
+        Customer customer = customerRepo.findBySdt(user.getPhone()).orElse(null);
+
+        if(customer != null) {
+            // Nếu đã tồn tại Customer với số điện thoại này, liên kết với User mới
+            customer.setUser(user);
+            return customerRepo.save(customer);
+        }
+
+        customer = new Customer();
         customer.setTen(user.getName());
         customer.setSdt(user.getPhone());
         customer.setDiaChi(user.getAddress());
@@ -29,7 +38,16 @@ public class CustomerService {
         customer.setUser(user);
         return customerRepo.save(customer);
     }
-
+    public boolean checkCustomer(String phone){
+        Customer customer = customerRepo.findBySdt(phone).orElse(null);
+        if(customer == null){
+            return true;
+        }
+        if(customer.getUser() != null){
+            throw new IllegalArgumentException("Số điện thoại đã tồn tại");
+        }
+        return false;
+    }
     /**
      * Lấy Customer theo userId
      */

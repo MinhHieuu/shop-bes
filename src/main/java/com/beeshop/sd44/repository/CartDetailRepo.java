@@ -16,7 +16,7 @@ import com.beeshop.sd44.entity.ProductDetail;
 @Repository
 public interface CartDetailRepo extends JpaRepository<CartDetail, UUID> {
     List<CartDetail> findByCart(Cart cart);
-    Optional<CartDetail> findByCartAndProductDetail(Cart cart, ProductDetail productDetail);
+    Optional<CartDetail> findByCartIdAndProductDetailId(UUID cart, UUID productId);
 
     void deleteByProductDetailIdIn(List<UUID> listId);
 }

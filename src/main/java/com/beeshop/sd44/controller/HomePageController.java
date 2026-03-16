@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import com.beeshop.sd44.entity.Cart;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -78,9 +79,12 @@ public class HomePageController {
 
     // B1: Thêm sản phẩm vào giỏ
     @PostMapping("add-product-to-cart/{productId}")
-    public ResponseEntity<?> handleAddToCart(@PathVariable("productId") UUID productDetailId, Authentication authentication) {
+    public ResponseEntity<?> handleAddToCart(@PathVariable("productId") UUID productDetailId,
+                                             @RequestBody Map<String, Object> body,
+                                             Authentication authentication) {
         String userId = authentication.getName();
-        cartService.addProductToCart(productDetailId, UUID.fromString(userId));
+        Integer quantity = body.get("quantity") != null ? (Integer) body.get("quantity") : 1;
+        cartService.addProductToCart(productDetailId, UUID.fromString(userId), quantity);
         return ResponseEntity.ok().body(new ApiResponse<>("them thanh cong", null));
     }
 
