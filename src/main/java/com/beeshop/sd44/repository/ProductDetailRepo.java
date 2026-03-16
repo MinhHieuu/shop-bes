@@ -16,7 +16,7 @@ import java.util.UUID;
 public interface ProductDetailRepo extends JpaRepository<ProductDetail, UUID> {
     List<ProductDetail> getProductDetailByDeleteFlag(boolean deleteFlag);
     List<ProductDetail> getProductDetailByName(String name);
-        List<ProductDetail> getProductDetailByProductId(UUID productId);
+    List<ProductDetail> getProductDetailByProductId(UUID productId);
     Boolean existsByName(String name);
     Boolean existsByNameAndIdNot(String name, UUID id);
     Boolean existsByProductAndColorAndSize(Product product, Color color, Size size);

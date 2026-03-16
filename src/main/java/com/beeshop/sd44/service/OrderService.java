@@ -105,14 +105,14 @@ public class OrderService {
         order.setShippingFee(shippingFee);
         order.setTotal(total);
         order.setVoucher(voucher);
-        order.setCode("HD" + order.getSum());
+        order.setCode("HD" + String.format("%03d", orderRepo.count()));
 
         if ("COD".equals(orderRequest.getPaymentMethod())) {
             order.setPaymentStatus(0); // chưa thanh toán
             order.setStatus(0); // chờ xác nhận
         } else if ("VNPAY".equals(orderRequest.getPaymentMethod())) {
             order.setPaymentStatus(0); // đang thanh toán
-            order.setStatus(1); // đã xác nhận
+            order.setStatus(0); // đã xác nhận
         }
 
         order = this.orderRepo.save(order);
@@ -211,7 +211,7 @@ public class OrderService {
         order.setPaymentMethod(orderRequest.getPaymentMethod());
         order.setNote(orderRequest.getNote());
         order.setTotal(orderRequest.getTotal());
-        order.setCode("HD" + order.getSum());
+//        order.setCode("HD" + order.getSum());
         if (type == 1) { // 1 = online
             order.setShippingFee(SHIPPING_FEE_DELIVERY);
             order.setTotal(order.getTotal() + SHIPPING_FEE_DELIVERY);

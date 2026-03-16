@@ -9,10 +9,8 @@ import java.util.UUID;
 @Entity
 @Table(name = "hoa_don")
 public class Order {
-    private static int sum = 0;
 
     public Order() {
-        sum += 1;
     }
 
     @Id
@@ -160,10 +158,6 @@ public class Order {
 
     public void setDetailList(List<OrderDetail> detailList) {
         this.detailList = detailList;
-    }
-
-    public int getSum() {
-        return sum;
     }
 
     public Integer getPaymentStatus() {
