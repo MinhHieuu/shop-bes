@@ -86,4 +86,13 @@ public class ProductDetailController {
         }
         return ResponseEntity.ok().body(new ApiResponse<>("tim thanh cong", listResponse));
     }
+
+    @GetMapping("product/{productId}")
+    public ResponseEntity<?> getByProductId(@PathVariable("productId") UUID id) {
+        List<ProductDetailResponse> listResponse = this.productDetailService.getListByProductId(id);
+        if(listResponse.isEmpty()) {
+            return ResponseEntity.status(404).body(new ApiResponse<>("khong tim thay san pham", null));
+        }
+        return ResponseEntity.ok().body(new ApiResponse<>("tim thanh cong", listResponse));
+    }
 }
