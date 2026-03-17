@@ -55,6 +55,10 @@ public class CartService {
         Optional<CartDetail> existing = cartDetailRepo.findByCartIdAndProductDetailId(cart.getId(), productDetail.getId());
         if (existing.isPresent()) {
             CartDetail cartDetail = existing.get();
+            if(productDetail.getQuantity() < cartDetail.getQuantity() + quantity){
+                throw new IllegalArgumentException("San pham vuot qua so luong quy dinh");
+            }
+
             cartDetail.setQuantity(cartDetail.getQuantity() + quantity);
             saveCartDetail(cartDetail);
         } else {
