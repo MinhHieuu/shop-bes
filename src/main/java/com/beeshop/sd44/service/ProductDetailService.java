@@ -26,6 +26,7 @@ public class ProductDetailService {
     private final ImageService imageService;
     private final ImageRepo imageRepo;
     private final OrderRepo orderRepo;
+
     public ProductDetailService(ProductDetailRepo productDetailRepo, ProductService productService,
             ColorService colorService, SizeService sizeService, ImageRepo imageRepo, OrderRepo orderRepo,
             ImageService imageService) {
@@ -46,12 +47,15 @@ public class ProductDetailService {
         }
         return responseList;
     }
+
     public List<ProductSale> getListSaler(String productId) {
         return this.orderRepo.getListSaler(productId);
     }
+
     public List<ProductSale> getListSalerByProductId(String productId) {
         return this.orderRepo.getListSalerByProductId(productId);
     }
+
     public ProductDetailResponse buildResponse(ProductDetail detail) {
         ProductDetailResponse response = new ProductDetailResponse();
         response.setId(detail.getId());
@@ -87,7 +91,7 @@ public class ProductDetailService {
         detail.setDeleteFlag(request.isDeleteFlag());
 
         // xu ly luu anh
-        if(!CollectionUtils.isEmpty(request.getImagesDelete())){
+        if (!CollectionUtils.isEmpty(request.getImagesDelete())) {
             List<Image> images = this.imageRepo.findByUrlIn(request.getImagesDelete());
             this.imageRepo.deleteAll(images);
         }
@@ -180,14 +184,21 @@ public class ProductDetailService {
 
     public void updateQuantity(UUID id, int status, int quantity) {
         ProductDetail productDetail = getById(id);
-        if(productDetail.getQuantity() < quantity) {
+        if (productDetail == null)
             return;
+        if (productDetail.getQuantity() < quantity)
+            return;
+        // If order is confirmed/processed (status == 1), decrease stock by ordered
+        // quantity
+        if (status == 1) {
+            productDetail.setQuantity(productDetail.getQuantity() - quantity);
         }
-        if(status == 1) {
-            productDetail.setQuantity(productDetail.getQuantity() -1);
-        } else if(status == 5){
-            productDetail.setQuantity(productDetail.getQuantity() + 1);
+        // If order is cancelled (status == 3), restore stock by ordered quantity
+        else if (status == 3) {
+            productDetail.setQuantity(productDetail.getQuantity() + quantity);
         }
+
+        this.productDetailRepo.save(productDetail);
     }
 
 }

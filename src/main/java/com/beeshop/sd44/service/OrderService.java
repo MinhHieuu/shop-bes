@@ -380,7 +380,16 @@ public class OrderService {
         if (status == 1 && operatorId != null) {
             order.setUser(userService.getUserById(operatorId));
         }
-        return orderRepo.save(order);
+
+        // Lưu order trước khi xử lý số lượng
+        Order saved = orderRepo.save(order);
+
+        // Nếu đơn bị hủy (status = 3) -> hoàn trả lại tồn kho cho các product detail
+        if (status == 3) {
+            handleQuantity(saved);
+        }
+
+        return saved;
     }
 
     /**
