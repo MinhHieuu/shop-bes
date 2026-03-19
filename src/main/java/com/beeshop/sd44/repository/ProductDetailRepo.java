@@ -15,16 +15,16 @@ import java.util.UUID;
 @Repository
 public interface ProductDetailRepo extends JpaRepository<ProductDetail, UUID> {
     List<ProductDetail> getProductDetailByDeleteFlag(boolean deleteFlag);
-    List<ProductDetail> getProductDetailByName(String name);
+//    List<ProductDetail> getProductDetailByName(String name);
     List<ProductDetail> getProductDetailByProductId(UUID productId);
-    Boolean existsByName(String name);
-    Boolean existsByNameAndIdNot(String name, UUID id);
+//    Boolean existsByName(String name);
+//    Boolean existsByNameAndIdNot(String name, UUID id);
     Boolean existsByProductAndColorAndSize(Product product, Color color, Size size);
     Boolean existsByProductAndColorAndSizeAndIdNot(Product product, Color color, Size size, UUID id);
-    @Query("SELECT pd FROM ProductDetail pd where :name is null or pd.name like %:name% " +
-            "and :colorId is null or pd.color = :colorId " +
-            "and :sizeId is null or pd.size = :sizeId " +
-            "and :salePrice is null or pd.salePrice = :salePrice")
+    @Query("SELECT pd FROM ProductDetail pd where (:name is null or pd.product.name like %:name%) " +
+            "and (:colorId is null or pd.color.id = :colorId) " +
+            "and (:sizeId is null or pd.size.id = :sizeId) " +
+            "and (:salePrice is null or pd.salePrice = :salePrice)")
     List<ProductDetail> searchProductDetail(@Param("name") String name,
                                             @Param("colorId")  UUID colorId,
                                             @Param("sizeId")  UUID sizeId,

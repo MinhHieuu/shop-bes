@@ -36,9 +36,9 @@ public class ProductDetailController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<ProductDetailResponse>> createProductDetail(@Valid @RequestBody ProductDetailRequest detail) {
-        if(this.productDetailService.isNameExit(detail.getName())) {
-            return ResponseEntity.status(409).body(new ApiResponse<>("ten da ton tai", null));
-        }
+//        if(this.productDetailService.isNameExit(detail.getName())) {
+//            return ResponseEntity.status(409).body(new ApiResponse<>("ten da ton tai", null));
+//        }
         Color color = new Color(detail.getColorId());
         Size size = new Size(detail.getSizeId());
         Product product = new Product();
@@ -62,9 +62,9 @@ public class ProductDetailController {
         if (detail == null) {
             return ResponseEntity.status(404).body(new ApiResponse<>("khong tim thay san pham chi tiet", null));
         }
-        if (this.productDetailService.isNameExit(request.getName(), request.getId())) {
-            return ResponseEntity.status(409).body(new ApiResponse<>("trung ten san pham", null));
-        }
+//        if (this.productDetailService.isNameExit(request.getName(), request.getId())) {
+//            return ResponseEntity.status(409).body(new ApiResponse<>("trung ten san pham", null));
+//        }
         Color color = new Color(request.getColorId());
         Size size = new Size(request.getSizeId());
         Product product = new Product();

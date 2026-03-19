@@ -176,7 +176,7 @@ public class InvoicePdfService {
             double price = od.getPrice() != null ? od.getPrice() : 0;
 
             if (od.getProductDetail() != null) {
-                productName = safeStr(od.getProductDetail().getName());
+//                productName = safeStr(od.getProductDetail().getName());
                 if (od.getProductDetail().getSize() != null)
                     sizeName = safeStr(od.getProductDetail().getSize().getName());
                 if (od.getProductDetail().getColor() != null)

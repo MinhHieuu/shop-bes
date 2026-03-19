@@ -11,8 +11,6 @@ public class ProductDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-    @Column(name = "ten")
-    private String name;
     @Column(name = "mo_ta")
     private String description;
     @Column(name = "so_luong")
@@ -43,14 +41,6 @@ public class ProductDetail {
 
     public void setId(UUID id) {
         this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getDescription() {

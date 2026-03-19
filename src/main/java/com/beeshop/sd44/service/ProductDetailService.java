@@ -59,7 +59,7 @@ public class ProductDetailService {
     public ProductDetailResponse buildResponse(ProductDetail detail) {
         ProductDetailResponse response = new ProductDetailResponse();
         response.setId(detail.getId());
-        response.setName(detail.getName());
+//        response.setName(detail.getName());
         response.setDescription(detail.getDescription());
         response.setQuantity(detail.getQuantity());
         response.setCostPrice(detail.getCostPrice());
@@ -80,7 +80,7 @@ public class ProductDetailService {
     }
 
     public ProductDetail buildProductDetail(ProductDetail detail, ProductDetailRequest request) {
-        detail.setName(request.getName());
+//        detail.setName(request.getName());
         detail.setDescription(request.getDescription());
         detail.setCostPrice(request.getCostPrice());
         detail.setSalePrice(request.getSalePrice());
@@ -144,17 +144,17 @@ public class ProductDetailService {
         return listResponse;
     }
 
-    public List<ProductDetail> getByName(String name) {
-        return this.productDetailRepo.getProductDetailByName(name);
-    }
+//    public List<ProductDetail> getByName(String name) {
+//        return this.productDetailRepo.getProductDetailByName(name);
+//    }
 
-    public Boolean isNameExit(String name) {
-        return this.productDetailRepo.existsByName(name);
-    }
+//    public Boolean isNameExit(String name) {
+//        return this.productDetailRepo.existsByName(name);
+//    }
 
-    public Boolean isNameExit(String name, UUID excludeId) {
-        return this.productDetailRepo.existsByNameAndIdNot(name, excludeId);
-    }
+//    public Boolean isNameExit(String name, UUID excludeId) {
+//        return this.productDetailRepo.existsByNameAndIdNot(name, excludeId);
+//    }
 
     public Boolean isProductExit(Product product, Color color, Size size) {
         return this.productDetailRepo.existsByProductAndColorAndSize(product, color, size);
