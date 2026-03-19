@@ -42,8 +42,8 @@ public class OrderController {
     private final NotificationService notificationService;
 
     public OrderController(OrderService orderService, VNPayService vnPayService,
-                           VoucherService voucherService, InvoicePdfService invoicePdfService,
-                           CustomerService customerService, NotificationService notificationService) {
+            VoucherService voucherService, InvoicePdfService invoicePdfService,
+            CustomerService customerService, NotificationService notificationService) {
         this.orderService = orderService;
         this.vnPayService = vnPayService;
         this.voucherService = voucherService;
@@ -76,7 +76,7 @@ public class OrderController {
 
     @PostMapping("pay")
     public ResponseEntity<ApiResponse<Object>> handleOrder(@Valid @RequestBody OrderRequest orderRequset,
-                                                           Authentication authentication, HttpServletRequest request) throws ServletException, IOException {
+            Authentication authentication, HttpServletRequest request) throws ServletException, IOException {
         UUID userId = UUID.fromString(authentication.getName());
         OrderResponse orderResponse = orderService.hanldePlaceOrder(orderRequset, userId);
         if ("COD".equals(orderRequset.getPaymentMethod())) {
@@ -95,7 +95,7 @@ public class OrderController {
     }
 
     @GetMapping("vnpay-return")
-    public void  handleVNPayReturn(@RequestParam Map<String, String> params, HttpServletResponse response)
+    public void handleVNPayReturn(@RequestParam Map<String, String> params, HttpServletResponse response)
             throws IOException {
         System.out.println("VNPay return received: " + params);
         // Verify signature
@@ -118,11 +118,16 @@ public class OrderController {
                         "Thanh toán VNPAY thành công",
                         "Đơn hàng #" + paidOrder.getCode() + " đã được thanh toán qua VNPAY",
                         paidOrder.getId(),
-                        "VNPAY_SUCCESS"
-                );
+                        "VNPAY_SUCCESS");
             }
 
             response.sendRedirect("http://localhost:3000/order/success");
+        } else if ("24".equals(responseCode)) {
+            // Người dùng hủy thanh toán tại VNPAY -> đánh dấu đơn là đã hủy
+            // paymentStatus = 3 (đã hủy), status = 3 (hủy)
+            orderService.updatePaymentStatus(UUID.fromString(orderId), 2);
+            orderService.updateOrderStatus(UUID.fromString(orderId), 3);
+            response.sendRedirect("http://localhost:3000/order/confirm");
         } else {
             // Thanh toán thất bại
             orderService.updatePaymentStatus(UUID.fromString(orderId), 3);
