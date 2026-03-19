@@ -18,6 +18,15 @@ public class ProductDetailResponse {
     private UUID colorId;
     private String colorName;
     private List<String> images;
+    private Integer quantityInOrder;
+
+    public Integer getQuantityInOrder() {
+        return quantityInOrder;
+    }
+
+    public void setQuantityInOrder(Integer quantityInOrder) {
+        this.quantityInOrder = quantityInOrder;
+    }
 
     public UUID getId() {
         return id;

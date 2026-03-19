@@ -23,12 +23,13 @@ public class VoucherController {
     @GetMapping("")
     public ResponseEntity<ApiResponse<List<VoucherResponse>>> getAll(
             @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) Integer trangThai) {
+            @RequestParam(required = false) Integer trangThai,
+            @RequestParam(required = false) Double price) {
         List<VoucherResponse> responses;
-        if ((keyword == null || keyword.isBlank()) && trangThai == null) {
+        if ((keyword == null || keyword.isBlank()) && trangThai == null && price == null) {
             responses = voucherService.getAll();
         } else {
-            responses = voucherService.search(keyword, trangThai);
+            responses = voucherService.search(keyword, trangThai, price);
         }
         return ResponseEntity.ok(new ApiResponse<>("lay thanh cong", responses));
     }

@@ -19,6 +19,7 @@ public class OrderResponse {
     private Integer paymentStatus;
     private String voucherCode;
     private UserResponse userResponse;
+    private UserResponse customerResponse;
     private List<ProductDetailResponse> productDetailResponses;
     // private Integer quantity;
     // private Integer price;
@@ -101,6 +102,14 @@ public class OrderResponse {
 
     public void setUserResponse(UserResponse userResponse) {
         this.userResponse = userResponse;
+    }
+
+    public UserResponse getCustomerResponse() {
+        return customerResponse;
+    }
+
+    public void setCustomerResponse(UserResponse customerResponse) {
+        this.customerResponse = customerResponse;
     }
 
     public List<ProductDetailResponse> getProductDetailResponses() {

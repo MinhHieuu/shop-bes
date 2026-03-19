@@ -6,6 +6,7 @@ import com.beeshop.sd44.dto.request.OrderRequest;
 import com.beeshop.sd44.dto.request.ProductDetailRequest;
 import com.beeshop.sd44.dto.response.OrderResponse;
 import com.beeshop.sd44.dto.response.ProductDetailResponse;
+import com.beeshop.sd44.dto.response.UserResponse;
 import com.beeshop.sd44.entity.*;
 import com.beeshop.sd44.repository.CartDetailRepo;
 import com.beeshop.sd44.repository.CartRepo;
@@ -33,7 +34,6 @@ public class OrderService {
     private final VoucherService voucherService;
     private final CartDetailRepo cartDetailRepo;
     private final NotificationService notificationService;
-
 
     public OrderService(OrderRepo orderRepo, OrderDetailRepo orderDetailRepo, UserService userService,
             CustomerService customerService, ProductDetailService productDetailService,
@@ -84,7 +84,7 @@ public class OrderService {
 
         // 3. Phí ship (online luôn có phí ship)
 
-        int shippingFee = orderRequest.isCounter() ? 0: SHIPPING_FEE_DELIVERY;
+        int shippingFee = orderRequest.isCounter() ? 0 : SHIPPING_FEE_DELIVERY;
 
         // 4. Tổng thanh toán
         double total = subTotal - discount + shippingFee;
@@ -141,8 +141,7 @@ public class OrderService {
                 "Đơn hàng mới #" + savedOrder.getCode(),
                 "Khách hàng vừa đặt đơn hàng online trị giá " + savedOrder.getTotal().longValue() + " đ",
                 savedOrder.getId(),
-                "NEW_ORDER"
-        );
+                "NEW_ORDER");
 
         return buildOrderResponse(order, subTotal, discount);
     }
@@ -165,9 +164,11 @@ public class OrderService {
         }
 
         // 3. Tính toán tổng tiền (có tính phí ship nếu là đơn giao hàng)
-//        int shippingFee = (orderRequest.getType() != null && orderRequest.getType() == 1) ? SHIPPING_FEE_DELIVERY : 0;
+        // int shippingFee = (orderRequest.getType() != null && orderRequest.getType()
+        // == 1) ? SHIPPING_FEE_DELIVERY : 0;
         double total = subTotal - discount;
-        if (total < 0) total = 0;
+        if (total < 0)
+            total = 0;
         orderRequest.setTotal(total);
 
         // 4. Tạo Order
@@ -211,7 +212,7 @@ public class OrderService {
         order.setPaymentMethod(orderRequest.getPaymentMethod());
         order.setNote(orderRequest.getNote());
         order.setTotal(orderRequest.getTotal());
-//        order.setCode("HD" + order.getSum());
+        // order.setCode("HD" + order.getSum());
         if (type == 1) { // 1 = online
             order.setShippingFee(SHIPPING_FEE_DELIVERY);
             order.setTotal(order.getTotal() + SHIPPING_FEE_DELIVERY);
@@ -241,6 +242,7 @@ public class OrderService {
     public Order getOrderById(UUID orderId) {
         return orderRepo.findById(orderId).orElse(null);
     }
+
     public Order getMyOrderById(UUID orderId, UUID userId) {
         Customer customer = customerService.getByUserId(userId);
         if (customer == null) {
@@ -250,6 +252,7 @@ public class OrderService {
         return orderRepo.findByCustomerIdAndId(customer.getId(), orderId).orElse(null);
 
     }
+
     private OrderResponse buildOrderResponse(Order order, double subTotal, double discount) {
         OrderResponse response = new OrderResponse();
         response.setId(order.getId().toString());
@@ -273,10 +276,28 @@ public class OrderService {
         if (order.getUser() != null) {
             response.setUserResponse(userService.buildRespone(userService.getUserById(order.getUser().getId())));
         }
+
+        if (order.getCustomer() != null) {
+            Customer c = order.getCustomer();
+            UserResponse cr = new UserResponse();
+            cr.setId(c.getId());
+            cr.setName(c.getTen());
+            cr.setPhone(c.getSdt());
+            cr.setAddress(c.getDiaChi());
+            if (c.getUser() != null) {
+                cr.setEmail(c.getUser().getEmail());
+                cr.setAvatar(c.getUser().getAvatar());
+                cr.setRole(c.getUser().getRole());
+            }
+            response.setCustomerResponse(cr);
+        }
+
         List<OrderDetail> odList = orderDetailRepo.getOrderDetailByOrder(order);
         List<ProductDetailResponse> listProduct = new ArrayList<>();
         for (OrderDetail orderDetail : odList) {
-            listProduct.add(productDetailService.buildResponse(orderDetail.getProductDetail()));
+            ProductDetailResponse pdResponse = productDetailService.buildResponse(orderDetail.getProductDetail());
+            pdResponse.setQuantityInOrder(orderDetail.getQuantity());
+            listProduct.add(pdResponse);
         }
         response.setProductDetailResponses(listProduct);
         return response;

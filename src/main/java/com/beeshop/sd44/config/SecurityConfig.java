@@ -31,12 +31,13 @@ public class SecurityConfig {
     @Value("${jwt.secret}")
     private String secretKey;
 
-    private String[] whiteList = new String[]{
-            "/api/login","/api/check-customer", "/","/product/**", "/api/register", "/api/products", "/api/refresh",
+    private String[] whiteList = new String[] {
+            "/api/login", "/api/check-customer", "/", "/product/**", "/api/register", "/api/products", "/api/refresh",
             "/api/order/vnpay-return", "/api/order/check-voucher", "/storage/**", "/images/**",
             "/sale", "/sale/**", "/api/admin/size", "/api/admin/chat-lieu", "/api/admin/thuong-hieu",
-            "/ws/**", "/api/notifications", "/api/notifications/**"
+            "/ws/**", "/api/notifications", "/api/notifications/**", "/api/admin/vouchers/**"
     };
+
     @Bean
     public PasswordEncoder encoder() {
         return new BCryptPasswordEncoder();
@@ -55,9 +56,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers(whiteList)
                         .permitAll()
-                    .requestMatchers("/api/admin/**").hasAnyRole("employee", "admin", "user")
-                    .requestMatchers("/api/employee/**").hasAnyRole("employee", "admin")
-                    .requestMatchers("/api/user/**").hasRole("user")
+                        .requestMatchers("/api/admin/**").hasAnyRole("employee", "admin", "user")
+                        .requestMatchers("/api/employee/**").hasAnyRole("employee", "admin")
+                        .requestMatchers("/api/user/**").hasRole("user")
                         .anyRequest().authenticated())
                 .logout(logout -> logout.disable())
                 .oauth2ResourceServer(
@@ -85,15 +86,20 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "https://dakfj-nylg.vercel.app"));// tên miền được truy cập tới sever
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "https://dakfj-nylg.vercel.app"));// tên
+                                                                                                                 // miền
+                                                                                                                 // được
+                                                                                                                 // truy
+                                                                                                                 // cập
+                                                                                                                 // tới
+                                                                                                                 // sever
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList(
                 "Authorization",
                 "Content-Type",
                 "Accept",
                 "Origin",
-                "X-Requested-With"
-        ));
+                "X-Requested-With"));
         configuration.setAllowCredentials(true);// cho client gửi kèm cookie
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

@@ -24,17 +24,18 @@ public class VoucherService {
         List<Voucher> list = voucherRepo.findAll();
         List<VoucherResponse> responses = new ArrayList<>();
         for (Voucher voucher : list) {
-            responses.add(buildResponse(voucher));
+            responses.add(buildResponse(voucher, null));
         }
         return responses;
     }
 
-    public List<VoucherResponse> search(String keyword, Integer trangThai) {
+    public List<VoucherResponse> search(String keyword, Integer trangThai, Double price) {
         String kw = (keyword != null && keyword.isBlank()) ? null : keyword;
-        List<Voucher> list = voucherRepo.searchVouchers(kw, trangThai);
+        Integer finalTrangThai = (price != null) ? null : trangThai;
+        List<Voucher> list = voucherRepo.searchVouchers(kw, finalTrangThai);
         List<VoucherResponse> responses = new ArrayList<>();
         for (Voucher voucher : list) {
-            responses.add(buildResponse(voucher));
+            responses.add(buildResponse(voucher, price));
         }
         return responses;
     }
@@ -52,12 +53,12 @@ public class VoucherService {
         if (voucher == null) {
             return null;
         }
-        return buildResponse(voucher);
+        return buildResponse(voucher, null);
     }
 
     public VoucherResponse create(VoucherRequest request) {
         Voucher voucher = new Voucher();
-        return buildResponse(saveVoucher(voucher, request));
+        return buildResponse(saveVoucher(voucher, request), null);
     }
 
     public VoucherResponse update(UUID id, VoucherRequest request) {
@@ -65,7 +66,7 @@ public class VoucherService {
         if (voucher == null) {
             return null;
         }
-        return buildResponse(saveVoucher(voucher, request));
+        return buildResponse(saveVoucher(voucher, request), null);
     }
 
     public void deactivate(UUID id) {
@@ -142,7 +143,7 @@ public class VoucherService {
         return voucherRepo.save(voucher);
     }
 
-    private VoucherResponse buildResponse(Voucher voucher) {
+    private VoucherResponse buildResponse(Voucher voucher, Double price) {
         VoucherResponse response = new VoucherResponse();
         response.setId(voucher.getId());
         response.setMa(voucher.getMa());
@@ -154,6 +155,19 @@ public class VoucherService {
         response.setTrangThai(voucher.getTrangThai());
         response.setNgayBatDau(voucher.getNgayBatDau());
         response.setNgayKetThuc(voucher.getNgayKetThuc());
+        
+        if (price != null) {
+            boolean isValid = true;
+            if (voucher.getTrangThai() == null || voucher.getTrangThai() == 0) {
+                isValid = false;
+            } else if (voucher.getToiThieu() != null && price < voucher.getToiThieu()) {
+                isValid = false;
+            }
+            response.setValid(isValid);
+        } else {
+            response.setValid(voucher.getTrangThai() != null && voucher.getTrangThai() == 1);
+        }
+        
         return response;
     }
 }

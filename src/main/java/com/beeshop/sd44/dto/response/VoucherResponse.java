@@ -14,6 +14,15 @@ public class VoucherResponse {
     private Integer trangThai;
     private Date ngayBatDau;
     private Date ngayKetThuc;
+    private boolean valid;
+
+    public boolean isValid() {
+        return valid;
+    }
+
+    public void setValid(boolean isValid) {
+        this.valid = isValid;
+    }
 
     public UUID getId() {
         return id;
