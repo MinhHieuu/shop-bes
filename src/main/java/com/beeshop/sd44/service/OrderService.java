@@ -334,7 +334,7 @@ public class OrderService {
     }
 
     public List<OrderResponse> getOrdersByUserId(UUID userId) {
-        List<Order> orders = orderRepo.findByUserId(userId);
+        List<Order> orders = orderRepo.findByUserIdOrderByCreatedAtDesc(userId);
         List<OrderResponse> responses = new ArrayList<>();
         for (Order order : orders) {
             responses.add(builresponse(order));
@@ -346,7 +346,7 @@ public class OrderService {
      * Lấy danh sách đơn hàng theo khach_hang_id — dùng cho role "user"
      */
     public List<OrderResponse> getOrdersByCustomerId(UUID customerId) {
-        List<Order> orders = orderRepo.findByCustomerId(customerId);
+        List<Order> orders = orderRepo.findByCustomerIdOrderByCreatedAtDesc(customerId);
         List<OrderResponse> responses = new ArrayList<>();
         for (Order order : orders) {
             responses.add(builresponse(order));
