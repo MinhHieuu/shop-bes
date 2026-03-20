@@ -63,4 +63,39 @@ public interface OrderRepo extends JpaRepository<Order, UUID> {
 			         		  LIMIT 5
 			""", nativeQuery = true)
 	List<ProductSale> getListSalerByProductId(String productId);
+
+	@Query(value = """
+			SELECT DATE(ngay_tao) as date, SUM(tong_tien) as revenue
+			FROM hoa_don
+			WHERE trang_thai = 5
+              AND (:fromDate IS NULL OR ngay_tao >= :fromDate)
+              AND (:toDate IS NULL OR ngay_tao <= :toDate)
+			GROUP BY DATE(ngay_tao)
+			ORDER BY date DESC
+			""", nativeQuery = true)
+	List<com.beeshop.sd44.dto.response.DailyRevenue> getRevenueByDate(@Param("fromDate") Date fromDate, @Param("toDate") Date toDate);
+
+	@Query(value = """
+			SELECT sp.ten as productName, SUM(hdt.so_luong) as quantitySold
+			FROM hoa_don_chi_tiet hdt
+			JOIN hoa_don hd ON hd.id = hdt.hoa_don_id
+			JOIN san_pham_chi_tiet spct ON spct.id = hdt.san_pham_chi_tiet_id
+			JOIN san_pham sp ON sp.id = spct.san_pham_id
+			WHERE hd.trang_thai = 5
+              AND (:fromDate IS NULL OR hd.ngay_tao >= :fromDate)
+              AND (:toDate IS NULL OR hd.ngay_tao <= :toDate)
+			GROUP BY sp.id, sp.ten
+			ORDER BY quantitySold DESC
+			LIMIT 10
+			""", nativeQuery = true)
+	List<com.beeshop.sd44.dto.response.BestSellingProduct> getBestSellingProducts(@Param("fromDate") Date fromDate, @Param("toDate") Date toDate);
+
+	@Query(value = """
+			SELECT COUNT(id)
+			FROM hoa_don
+			WHERE trang_thai = 5
+              AND (:fromDate IS NULL OR ngay_tao >= :fromDate)
+              AND (:toDate IS NULL OR ngay_tao <= :toDate)
+			""", nativeQuery = true)
+	Long getTotalOrders(@Param("fromDate") Date fromDate, @Param("toDate") Date toDate);
 }

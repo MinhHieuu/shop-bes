@@ -29,4 +29,16 @@ public interface ProductDetailRepo extends JpaRepository<ProductDetail, UUID> {
                                             @Param("colorId")  UUID colorId,
                                             @Param("sizeId")  UUID sizeId,
                                             @Param("salePrice") Double salePrice);
+
+    @Query(value = """
+            SELECT sp.ten as productName, ms.ten as colorName, sz.ten as sizeName, spct.so_luong as quantity
+            FROM san_pham_chi_tiet spct
+            JOIN san_pham sp ON sp.id = spct.san_pham_id
+            JOIN mau_sac ms ON ms.id = spct.mau_sac_id
+            JOIN size sz ON sz.id = spct.size_id
+            WHERE spct.so_luong < :threshold
+              AND spct.delete_flag = false
+            ORDER BY spct.so_luong ASC
+            """, nativeQuery = true)
+    List<com.beeshop.sd44.dto.response.LowStockProduct> getLowStockProducts(@Param("threshold") int threshold);
 }
