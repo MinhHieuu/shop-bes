@@ -78,28 +78,28 @@ public class HomePageController {
     }
 
     // B1: Thêm sản phẩm vào giỏ
-//    @PostMapping("add-product-to-cart/{productId}")
-//    public ResponseEntity<?> handleAddToCart(@PathVariable("productId") UUID productDetailId,
-//                                             @RequestBody Map<String, Object> body,
-//                                             Authentication authentication) {
-//        String userId = authentication.getName();
-//        Integer quantity = body.get("quantity") != null ? (Integer) body.get("quantity") : 1;
-//        cartService.addProductToCart(productDetailId, UUID.fromString(userId), quantity);
-//        return ResponseEntity.ok().body(new ApiResponse<>("them thanh cong", null));
-//    }
+    @PostMapping("add-product-to-cart/{productId}")
+    public ResponseEntity<?> handleAddToCart(@PathVariable("productId") UUID productDetailId,
+                                             @RequestBody Map<String, Object> body,
+                                             Authentication authentication) {
+        String userId = authentication.getName();
+        Integer quantity = body.get("quantity") != null ? (Integer) body.get("quantity") : 1;
+        cartService.addProductToCart(productDetailId, UUID.fromString(userId), quantity);
+        return ResponseEntity.ok().body(new ApiResponse<>("them thanh cong", null));
+    }
 
     // B2: Cập nhật số lượng sản phẩm trong giỏ
-//    @PutMapping("cart/{cartDetailId}")
-//    public ResponseEntity<?> updateCartQuantity(@PathVariable("cartDetailId") UUID cartDetailId,
-//                                                @RequestParam int quantity,
-//                                                Authentication authentication) {
-//        UUID userId = UUID.fromString(authentication.getName());
-//        CartDetailResponse response = cartService.updateQuantity(cartDetailId, quantity, userId);
-//        if (response == null) {
-//            return ResponseEntity.ok().body(new ApiResponse<>("da xoa san pham khoi gio hang", null));
-//        }
-//        return ResponseEntity.ok().body(new ApiResponse<>("cap nhat thanh cong", response));
-//    }
+    @PutMapping("cart/{cartDetailId}")
+    public ResponseEntity<?> updateCartQuantity(@PathVariable("cartDetailId") UUID cartDetailId,
+                                                @RequestParam int quantity,
+                                                Authentication authentication) {
+        UUID userId = UUID.fromString(authentication.getName());
+        CartDetailResponse response = cartService.updateQuantity(cartDetailId, quantity, userId);
+        if (response == null) {
+            return ResponseEntity.ok().body(new ApiResponse<>("da xoa san pham khoi gio hang", null));
+        }
+        return ResponseEntity.ok().body(new ApiResponse<>("cap nhat thanh cong", response));
+    }
 
     // B2: Xóa 1 sản phẩm khỏi giỏ
     @DeleteMapping("remove-product-from-cart/{cartDetailId}")
@@ -109,11 +109,11 @@ public class HomePageController {
         return ResponseEntity.ok().body(new ApiResponse<>("xoa thanh cong", null));
     }
 
-//    // B2: Clear toàn bộ giỏ hàng
-//    @DeleteMapping("cart/clear")
-//    public ResponseEntity<?> clearCart(Authentication authentication) {
-//        UUID userId = UUID.fromString(authentication.getName());
-//        cartService.clearCart(userId);
-//        return ResponseEntity.ok().body(new ApiResponse<>("xoa gio hang thanh cong", null));
-//    }
+    // B2: Clear toàn bộ giỏ hàng
+    @DeleteMapping("cart/clear")
+    public ResponseEntity<?> clearCart(Authentication authentication) {
+        UUID userId = UUID.fromString(authentication.getName());
+        cartService.clearCart(userId);
+        return ResponseEntity.ok().body(new ApiResponse<>("xoa gio hang thanh cong", null));
+    }
 }
