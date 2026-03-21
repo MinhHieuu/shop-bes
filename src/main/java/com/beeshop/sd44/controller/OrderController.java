@@ -120,7 +120,6 @@ public class OrderController {
                         paidOrder.getId(),
                         "VNPAY_SUCCESS");
             }
-
             response.sendRedirect("http://localhost:3000/order/success");
         } else if ("24".equals(responseCode)) {
             // Người dùng hủy thanh toán tại VNPAY -> đánh dấu đơn là đã hủy
