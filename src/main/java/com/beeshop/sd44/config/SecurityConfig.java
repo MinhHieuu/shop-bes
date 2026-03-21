@@ -17,6 +17,7 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -30,9 +31,21 @@ public class SecurityConfig {
     @Value("${jwt.secret}")
     private String secretKey;
 
+    private String[] whiteList = new String[] {
+            "/api/login", "/api/check-customer", "/", "/product/**", "/api/register", "/api/products", "/api/refresh",
+            "/api/order/vnpay-return", "/api/order/check-voucher", "/storage/**", "/images/**",
+            "/sale", "/sale/**", "/api/admin/size", "/api/admin/chat-lieu", "/api/admin/thuong-hieu",
+            "/ws/**", "/api/notifications", "/api/notifications/**", "/api/admin/vouchers/**"
+    };
+
     @Bean
     public PasswordEncoder encoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
     }
 
     @Bean
@@ -41,8 +54,11 @@ public class SecurityConfig {
                 .csrf(c -> c.disable())
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/login", "/", "/register", "/products", "/refresh").permitAll()
-                        .requestMatchers("/admin/**").hasRole("admin")
+                        .requestMatchers(whiteList)
+                        .permitAll()
+                        .requestMatchers("/api/admin/**").hasAnyRole("employee", "admin", "user")
+                        .requestMatchers("/api/employee/**").hasAnyRole("employee", "admin")
+                        .requestMatchers("/api/user/**").hasRole("user")
                         .anyRequest().authenticated())
                 .logout(logout -> logout.disable())
                 .oauth2ResourceServer(
@@ -70,9 +86,20 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http:/localhost:3000"));// tên miền được truy cập tới sever
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "https://dakfj-nylg.vercel.app"));// tên
+                                                                                                                 // miền
+                                                                                                                 // được
+                                                                                                                 // truy
+                                                                                                                 // cập
+                                                                                                                 // tới
+                                                                                                                 // sever
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList(
+                "Authorization",
+                "Content-Type",
+                "Accept",
+                "Origin",
+                "X-Requested-With"));
         configuration.setAllowCredentials(true);// cho client gửi kèm cookie
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

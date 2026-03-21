@@ -1,5 +1,6 @@
 package com.beeshop.sd44.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 
@@ -16,6 +17,7 @@ public class Color {
     @Column(name = "ten")
     private String name;
     @OneToMany(mappedBy = "color")
+    @JsonIgnore
     private List<ProductDetail> list;
 
     public UUID getId() {
@@ -42,9 +44,10 @@ public class Color {
         this.list = list;
     }
 
-    public Color (UUID id) {
+    public Color(UUID id) {
         this.id = id;
     }
 
-    public Color(){};
+    public Color() {
+    };
 }

@@ -2,7 +2,6 @@ package com.beeshop.sd44.service;
 
 import com.beeshop.sd44.dto.request.LoginRequest;
 import com.beeshop.sd44.dto.response.LoginResponse;
-import com.beeshop.sd44.dto.response.UserResponse;
 import com.beeshop.sd44.entity.RefreshToken;
 import com.beeshop.sd44.entity.User;
 import com.beeshop.sd44.repository.RefreshTokenRepo;

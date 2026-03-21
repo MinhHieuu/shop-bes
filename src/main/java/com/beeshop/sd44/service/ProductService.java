@@ -1,25 +1,34 @@
 package com.beeshop.sd44.service;
 
+import com.beeshop.sd44.dto.request.ProductDetailRequest;
 import com.beeshop.sd44.dto.request.ProductRequest;
+import com.beeshop.sd44.dto.response.ProductDetailResponse;
 import com.beeshop.sd44.dto.response.ProductResponse;
-import com.beeshop.sd44.entity.Brand;
-import com.beeshop.sd44.entity.Marterial;
-import com.beeshop.sd44.entity.Product;
+import com.beeshop.sd44.entity.*;
+import com.beeshop.sd44.repository.ImageRepo;
+import com.beeshop.sd44.repository.ProductDetailRepo;
 import com.beeshop.sd44.repository.ProductRepo;
+import jakarta.transaction.Transactional;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
     private final ProductRepo repo;
     private final BrandService brandService;
     private final MarterialService marterialService;
-
-    public ProductService(ProductRepo repo, BrandService brandService, MarterialService marterialService) {
+    private final ProductDetailRepo productDetailRepo;
+    private final ImageRepo imageRepo;
+    public ProductService(ProductRepo repo, ImageRepo imageRepo, ProductDetailRepo productDetailRepo, BrandService brandService, MarterialService marterialService) {
         this.repo = repo;
         this.brandService = brandService;
         this.marterialService = marterialService;
+        this.productDetailRepo = productDetailRepo;
+        this.imageRepo = imageRepo;
     }
 
     public List<ProductResponse> getAll() {
@@ -35,17 +44,23 @@ public class ProductService {
         return this.repo.existsByName(name);
     }
 
-    public Product createProduct(ProductRequest request) {
+    @Transactional
+    public void createProduct(ProductRequest request) {
         Product product = new Product();
         product.setCreatedAt(new Date());
-        return this.repo.save(buildProduct(product, request));
+        product = buildProduct(product, request);
+        List<Image> images = saveDetail(product, request.getProductDetails(), null);
+        this.repo.save(product);
+        this.imageRepo.saveAll(images);
     }
 
     public ProductResponse hanldeResponse(Product product) {
         ProductResponse response = new ProductResponse();
         response.setId(product.getId());
         response.setName(product.getName());
+        response.setBrandId(product.getBrand().getId());
         response.setBrand(product.getBrand().getName());
+        response.setMarterialId(product.getMarterial().getId());
         response.setMarterial(product.getMarterial().getName());
         response.setCreatedAt(product.getCreatedAt());
         response.setImage(product.getImage());
@@ -62,20 +77,96 @@ public class ProductService {
         return null;
     }
 
-    public Product updateProduct(ProductRequest request) {
+    @Transactional
+    public void updateProduct(ProductRequest request) {
         Product product = this.getById(request.getId());
         product.setUpdatedAt(new Date());
-        return this.repo.save(buildProduct(product, request));
+        product = buildProduct(product, request);
+
+        List<Image> images = saveDetail(product, request.getProductDetails(), request.getProductDetailsUpdate());
+        this.repo.save(product);
+        this.imageRepo.saveAll(images);
     }
 
-    public Product buildProduct(Product product, ProductRequest request) {
-        Brand brand = brandService.getById(request.getBrandId());
-        Marterial marterial = marterialService.getById(request.getMarterialId());
-        product.setName(request.getName());
+    public Product buildProduct(Product product, ProductRequest requestBase) {
+        Brand brand = brandService.getById(requestBase.getBrandId());
+        Marterial marterial = marterialService.getById(requestBase.getMarterialId());
+        product.setName(requestBase.getName());
         product.setBrand(brand);
         product.setMarterial(marterial);
-        product.setImage(request.getImage());
-        product.setStatus(request.getStatus());
+        product.setImage(requestBase.getImage());
+        product.setStatus(requestBase.getStatus());
         return product;
+    }
+
+    private List<Image> saveDetail(Product product, List<ProductDetailRequest> details, List<ProductDetailRequest> listUpdate) {
+        // tao detail
+        List<ProductDetail> list = product.getList();
+        List<Image> imagesAfterProductSaved = new ArrayList<>();
+        //update cu
+        if(listUpdate != null && !listUpdate.isEmpty()){
+            for(ProductDetailRequest request: listUpdate){
+                for(ProductDetail detail: list){
+                    if(detail.getId().equals(request.getId())){
+                        detail.setDescription(request.getDescription());
+                        detail.setCostPrice(request.getCostPrice());
+                        detail.setSalePrice(request.getSalePrice());
+                        detail.setQuantity(request.getQuantity());
+
+                        Color color = new Color();
+                        color.setId(request.getColorId());
+                        Size size = new Size();
+                        size.setId(request.getSizeId());
+                        detail.setColor(color);
+                        detail.setSize(size);
+                        imagesAfterProductSaved.addAll(this.saveImage(request.getImages(), request.getImagesDelete(), detail));
+                    }
+                }
+            }
+        }
+
+        // them moi
+        if(details != null && !details.isEmpty()){
+            for(ProductDetailRequest request: details){
+                UUID id = request.getId();
+                ProductDetail detail = new ProductDetail();
+                detail.setDescription(request.getDescription());
+                detail.setCostPrice(request.getCostPrice());
+                detail.setSalePrice(request.getSalePrice());
+                detail.setQuantity(request.getQuantity());
+                detail.setProduct(product);
+
+
+                Color color = new Color();
+                color.setId(request.getColorId());
+                Size size = new Size();
+                size.setId(request.getSizeId());
+                detail.setColor(color);
+                detail.setSize(size);
+                detail.setDeleteFlag(request.isDeleteFlag());
+                list.add(detail);
+                imagesAfterProductSaved.addAll(this.saveImage(request.getImages(), request.getImagesDelete(), detail));
+            }
+        }
+
+        product.setList(list);
+        return imagesAfterProductSaved;
+    }
+
+    List<Image> saveImage(List<String> imagesUrl, List<String> imagesDelete, ProductDetail detail){
+        // xu ly luu anh
+        if (!CollectionUtils.isEmpty(imagesDelete)) {
+            List<Image> images = this.imageRepo.findByUrlIn(imagesDelete);
+            this.imageRepo.deleteAll(images);
+        }
+
+        List<Image> images = new ArrayList<>();
+        for (String imageUrl :imagesUrl) {
+            Image image = new Image();
+            image.setUrl(imageUrl);
+            image.setProductDetail(detail);
+            images.add(image);
+        }
+        return images;
     }
 }

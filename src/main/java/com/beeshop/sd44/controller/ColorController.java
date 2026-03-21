@@ -1,20 +1,18 @@
 package com.beeshop.sd44.controller;
 
 import com.beeshop.sd44.entity.ApiResponse;
-import com.beeshop.sd44.entity.Marterial;
 import com.beeshop.sd44.entity.Color;
 import com.beeshop.sd44.service.ColorService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/api/admin")
 public class ColorController {
     @Autowired
     private ColorService service;
@@ -26,14 +24,10 @@ public class ColorController {
     }
 
     @PostMapping("mau-sac")
-    public ResponseEntity<?> create(@Valid @RequestBody Color color, BindingResult result) {
+    public ResponseEntity<?> create(@Valid @RequestBody Color color) {
         boolean exitsMau = this.service.isNameExit(color.getName());
-        if (exitsMau == true) {
-            return ResponseEntity.status(409).body(new ApiResponse<Marterial>("da ton tai", null));
-        }
-        if (result.hasErrors()) {
-            String error = result.getFieldError().getDefaultMessage();
-            return ResponseEntity.status(400).body(new ApiResponse<>(error, null));
+        if (exitsMau) {
+            return ResponseEntity.status(409).body(new ApiResponse<>("da ton tai", null));
         }
         this.service.hanldeSave(color);
         return ResponseEntity.status(201).body(new ApiResponse<>("tao moi thanh cong", color));
@@ -51,13 +45,10 @@ public class ColorController {
 
     @PutMapping("mau-sac/{id}")
     public ResponseEntity<?> update(@PathVariable("id") UUID id,
-            @Valid @RequestBody Color newColor, BindingResult result) {
+            @Valid @RequestBody Color newColor) {
         Color color = this.service.getById(id);
         if (color == null) {
             return ResponseEntity.status(404).body(new ApiResponse<>("khong tim thay", null));
-        }
-        if (result.hasErrors()) {
-            return ResponseEntity.status(400).body(new ApiResponse<>(result.getFieldError().getDefaultMessage(), null));
         }
         color.setName(newColor.getName());
         this.service.hanldeSave(color);

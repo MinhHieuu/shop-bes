@@ -15,7 +15,7 @@ public class ProductDetailRequest {
     private UUID sizeId;
     private UUID colorId;
     private List<String> images;
-
+    private List<String> imagesDelete;
     public UUID getId() {
         return id;
     }
@@ -102,5 +102,13 @@ public class ProductDetailRequest {
 
     public void setImages(List<String> images) {
         this.images = images;
+    }
+
+    public List<String> getImagesDelete() {
+        return imagesDelete;
+    }
+
+    public void setImagesDelete(List<String> imagesDelete) {
+        this.imagesDelete = imagesDelete;
     }
 }

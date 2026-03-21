@@ -4,19 +4,33 @@ import java.util.Date;
 import java.util.List;
 
 public class OrderResponse {
+    private String id;
     private String code;
     private String note;
     private Date createdAt;
     private Date paymentDate;
     private String paymentMethod;
     private Integer shippingFee;
-    private Double total;
+    private Double subTotal;       // tổng tiền hàng (trước giảm)
+    private Double discount;       // số tiền giảm
+    private Double total;          // tổng thanh toán cuối cùng
     private Integer type;
     private Integer status;
+    private Integer paymentStatus;
+    private String voucherCode;
     private UserResponse userResponse;
+    private UserResponse customerResponse;
     private List<ProductDetailResponse> productDetailResponses;
-//    private Integer quantity;
-//    private Integer price;
+    // private Integer quantity;
+    // private Integer price;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getCode() {
         return code;
@@ -90,6 +104,14 @@ public class OrderResponse {
         this.userResponse = userResponse;
     }
 
+    public UserResponse getCustomerResponse() {
+        return customerResponse;
+    }
+
+    public void setCustomerResponse(UserResponse customerResponse) {
+        this.customerResponse = customerResponse;
+    }
+
     public List<ProductDetailResponse> getProductDetailResponses() {
         return productDetailResponses;
     }
@@ -106,19 +128,35 @@ public class OrderResponse {
         this.paymentMethod = paymentMethod;
     }
 
-    //    public Integer getQuantity() {
-//        return quantity;
-//    }
-//
-//    public void setQuantity(Integer quantity) {
-//        this.quantity = quantity;
-//    }
-//
-//    public Integer getPrice() {
-//        return price;
-//    }
-//
-//    public void setPrice(Integer price) {
-//        this.price = price;
-//    }
+    public Double getSubTotal() {
+        return subTotal;
+    }
+
+    public void setSubTotal(Double subTotal) {
+        this.subTotal = subTotal;
+    }
+
+    public Double getDiscount() {
+        return discount;
+    }
+
+    public void setDiscount(Double discount) {
+        this.discount = discount;
+    }
+
+    public Integer getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(Integer paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
+
+    public String getVoucherCode() {
+        return voucherCode;
+    }
+
+    public void setVoucherCode(String voucherCode) {
+        this.voucherCode = voucherCode;
+    }
 }

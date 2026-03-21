@@ -38,8 +38,12 @@ public class FileService {
         if(file.isEmpty()) {
             return "";
         }
-        String finalName = System.currentTimeMillis() + "-" + file.getOriginalFilename();
-        URI uri = new URI(baseUri + folder + "/" + finalName);
+        // Sanitize filename: replace spaces and special URI-unsafe characters with underscores
+        String originalName = file.getOriginalFilename() != null ? file.getOriginalFilename() : "file";
+        String safeName = originalName.replaceAll("\\s+", "_").replaceAll("[^a-zA-Z0-9._\\-]", "_");
+        String finalName = System.currentTimeMillis() + "-" + safeName;
+        // Save directly to baseUri root so files are accessible at /images/<filename>
+        URI uri = new URI(baseUri + finalName);
         Path path = Paths.get(uri);
         try {
             InputStream inputStream = file.getInputStream();

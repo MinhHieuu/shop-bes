@@ -1,6 +1,7 @@
 package com.beeshop.sd44.dto.response;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 public class ProductResponse {
@@ -8,10 +9,13 @@ public class ProductResponse {
     private String name;
     private String image;
     private String status;
+    private UUID marterialId;
     private String marterial;
+    private UUID brandId;
     private String brand;
     private Date createdAt;
     private Date updatedAt;
+    private List<ProductDetailResponse> detailList;
     public UUID getId() {
         return id;
     }
@@ -44,12 +48,28 @@ public class ProductResponse {
         this.status = status;
     }
 
+    public UUID getMarterialId() {
+        return marterialId;
+    }
+
+    public void setMarterialId(UUID marterialId) {
+        this.marterialId = marterialId;
+    }
+
     public String getMarterial() {
         return marterial;
     }
 
     public void setMarterial(String marterial) {
         this.marterial = marterial;
+    }
+
+    public UUID getBrandId() {
+        return brandId;
+    }
+
+    public void setBrandId(UUID brandId) {
+        this.brandId = brandId;
     }
 
     public String getBrand() {
@@ -74,5 +94,13 @@ public class ProductResponse {
 
     public Date getUpdatedAt() {
         return this.updatedAt;
+    }
+
+    public List<ProductDetailResponse> getDetailList() {
+        return detailList;
+    }
+
+    public void setDetailList(List<ProductDetailResponse> detailList) {
+        this.detailList = detailList;
     }
 }

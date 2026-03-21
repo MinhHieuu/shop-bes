@@ -1,11 +1,31 @@
 package com.beeshop.sd44.dto.response;
 
+import java.util.UUID;
+
 public class UserResponse {
+    private UUID id;
     private String name;
     private String email;
     private String role;
     private String phone;
     private String address;
+    private String avatar;
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;

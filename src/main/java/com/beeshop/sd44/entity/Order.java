@@ -9,10 +9,8 @@ import java.util.UUID;
 @Entity
 @Table(name = "hoa_don")
 public class Order {
-    private int sum;
 
     public Order() {
-        sum += 1;
     }
 
     @Id
@@ -34,6 +32,8 @@ public class Order {
     private String paymentMethod;
     @Column(name = "trang_thai")
     private Integer status;
+    @Column(name = "trang_thai_thanh_toan")
+    private Integer paymentStatus;
     @Column(name = "phan_loai")
     private Integer type;
     @ManyToOne
@@ -160,7 +160,11 @@ public class Order {
         this.detailList = detailList;
     }
 
-    public int getSum() {
-        return this.sum;
+    public Integer getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(Integer paymentStatus) {
+        this.paymentStatus = paymentStatus;
     }
 }

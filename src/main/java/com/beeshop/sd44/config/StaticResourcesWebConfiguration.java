@@ -13,5 +13,7 @@ public class StaticResourcesWebConfiguration implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/storage/**").addResourceLocations(baseUri);
+        // Serve uploaded images at /images/<filename> from all subfolders under base-uri
+        registry.addResourceHandler("/images/**").addResourceLocations(baseUri);
     }
 }

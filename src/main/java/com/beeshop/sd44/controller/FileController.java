@@ -24,16 +24,16 @@ public class FileController {
     }
     @PostMapping("files")
     public ResponseEntity<?> upload(@RequestParam("file")MultipartFile file,
-                                 @RequestParam("folder") String folder) throws URISyntaxException {
-        this.fileService.createDirectory(baseUri + folder);
+                                 @RequestParam(value = "folder", required = false, defaultValue = "") String folder) throws URISyntaxException {
+        this.fileService.createDirectory(baseUri);
         String uploadFile = this.fileService.upload(file, folder);
         return ResponseEntity.ok().body(new ApiResponse<>("upload success", uploadFile));
     }
 
     @PostMapping("multiple")
     public ResponseEntity<?> uploadMultiple(@RequestParam("file") MultipartFile[] files,
-                                            @RequestParam("folder") String folder) throws URISyntaxException {
-        this.fileService.createDirectory(baseUri + folder);
+                                            @RequestParam(value = "folder", required = false, defaultValue = "") String folder) throws URISyntaxException {
+        this.fileService.createDirectory(baseUri);
         List<String> list = this.fileService.uploads(files, folder);
         return ResponseEntity.ok().body(new ApiResponse<>("upload success", list));
     }

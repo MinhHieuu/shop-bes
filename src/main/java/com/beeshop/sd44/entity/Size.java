@@ -1,5 +1,6 @@
 package com.beeshop.sd44.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 
@@ -16,6 +17,7 @@ public class Size {
     @Column(name = "ten")
     private String name;
     @OneToMany(mappedBy = "size")
+    @JsonIgnore
     private List<ProductDetail> list;
 
     public UUID getId() {
