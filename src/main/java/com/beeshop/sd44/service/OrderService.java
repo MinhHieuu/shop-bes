@@ -186,6 +186,14 @@ public class OrderService {
             orderDetail.setProductDetail(productDetail);
             orderDetail.setQuantity(pdRequest.getQuantity());
             orderDetail.setPrice(productDetail.getSalePrice());
+
+            if(productDetail.getQuantity() - pdRequest.getQuantity() < 0){
+                throw new RuntimeException("So luong san pham trong kho da het");
+            }
+
+            productDetail.setQuantity(productDetail.getQuantity() - pdRequest.getQuantity());
+
+            // tru so luong di
             orderDetailRepo.save(orderDetail);
         }
         return buildOrderResponse(order, subTotal, discount);

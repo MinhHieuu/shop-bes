@@ -19,6 +19,8 @@ public interface VoucherRepo extends JpaRepository<Voucher, UUID> {
            "(:trangThai IS NULL OR v.trangThai = :trangThai) " +
            "AND (:keyword IS NULL OR :keyword = '' OR " +
            "LOWER(v.ma) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-           "LOWER(v.ten) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+           "LOWER(v.ten) LIKE LOWER(CONCAT('%', :keyword, '%')))" +
+            "AND v.ngayKetThuc >= now()"
+    )
     List<Voucher> searchVouchers(@Param("keyword") String keyword, @Param("trangThai") Integer trangThai);
 }
