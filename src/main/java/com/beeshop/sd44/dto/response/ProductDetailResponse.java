@@ -5,7 +5,6 @@ import java.util.UUID;
 
 public class ProductDetailResponse {
     private UUID id;
-    private String name;
     private String description;
     private Integer quantity;
     private Double costPrice;
@@ -35,15 +34,6 @@ public class ProductDetailResponse {
     public void setId(UUID id) {
         this.id = id;
     }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getDescription() {
         return description;
     }

@@ -68,7 +68,7 @@ public class OrderService {
                 throw new IllegalArgumentException("So luong phai lon hon 0");
             }
             if (pdRequest.getQuantity() > productDetail.getQuantity()) {
-                throw new IllegalArgumentException("San pham " + productDetail.getName()
+                throw new IllegalArgumentException("San pham " + productDetail.getProduct().getName()
                         + " chi con " + productDetail.getQuantity() + " san pham");
             }
             subTotal += productDetail.getSalePrice() * pdRequest.getQuantity();

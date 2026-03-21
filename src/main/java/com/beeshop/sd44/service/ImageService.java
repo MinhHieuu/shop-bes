@@ -26,7 +26,7 @@ public class ImageService {
             ImageResponse imgRes = new ImageResponse();
             imgRes.setId(image.getId());
             imgRes.setUrl(image.getUrl());
-            imgRes.setProductDetailName(image.getProductDetail().getName());
+//            imgRes.setProductDetailName(image.getProductDetail().getName());
             listResponse.add(imgRes);
         }
         return listResponse;
@@ -38,7 +38,7 @@ public class ImageService {
             ImageResponse response = new ImageResponse();
             response.setId(image.getId());
             response.setUrl(image.getUrl());
-            response.setProductDetailName(image.getProductDetail().getName());
+//            response.setProductDetailName(image.getProductDetail().getName());
             responseList.add(response);
         }
         return responseList;
