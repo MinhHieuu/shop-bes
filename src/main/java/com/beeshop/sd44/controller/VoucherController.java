@@ -14,6 +14,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/admin/vouchers")
 public class VoucherController {
+
     private final VoucherService voucherService;
 
     public VoucherController(VoucherService voucherService) {
@@ -23,45 +24,57 @@ public class VoucherController {
     @GetMapping("")
     public ResponseEntity<ApiResponse<List<VoucherResponse>>> getAll(
             @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) Integer trangThai,
-            @RequestParam(required = false) Double price) {
+            @RequestParam(required = false) Integer trangThai) {
+
         List<VoucherResponse> responses;
-        if ((keyword == null || keyword.isBlank()) && trangThai == null && price == null) {
+
+        if ((keyword == null || keyword.isBlank()) && trangThai == null) {
             responses = voucherService.getAll();
         } else {
-            responses = voucherService.search(keyword, trangThai, price);
+            responses = voucherService.search(keyword, trangThai);
         }
-        return ResponseEntity.ok(new ApiResponse<>("lay thanh cong", responses));
+
+        return ResponseEntity.ok(new ApiResponse<>("Lấy danh sách voucher thành công", responses));
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<ApiResponse<VoucherResponse>> getById(@PathVariable("id") UUID id) {
-        VoucherResponse response = voucherService.getResponseById(id);
-        if (response == null) {
-            return ResponseEntity.status(404).body(new ApiResponse<>("khong tim thay", null));
+    public ResponseEntity<ApiResponse<VoucherResponse>> getById(@PathVariable UUID id) {
+        try {
+            VoucherResponse response = voucherService.getResponseById(id);
+            return ResponseEntity.ok(new ApiResponse<>("Lấy voucher thành công", response));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body(new ApiResponse<>(e.getMessage(), null));
         }
-        return ResponseEntity.ok(new ApiResponse<>("lay thanh cong", response));
     }
 
     @PostMapping("")
     public ResponseEntity<ApiResponse<VoucherResponse>> create(@Valid @RequestBody VoucherRequest request) {
-        VoucherResponse response = voucherService.create(request);
-        return ResponseEntity.status(201).body(new ApiResponse<>("tao moi thanh cong", response));
+        try {
+            VoucherResponse response = voucherService.create(request);
+            return ResponseEntity.status(201).body(new ApiResponse<>("Tạo voucher thành công", response));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new ApiResponse<>(e.getMessage(), null));
+        }
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<ApiResponse<VoucherResponse>> update(@PathVariable("id") UUID id,
+    public ResponseEntity<ApiResponse<VoucherResponse>> update(@PathVariable UUID id,
                                                                @Valid @RequestBody VoucherRequest request) {
-        VoucherResponse response = voucherService.update(id, request);
-        if (response == null) {
-            return ResponseEntity.status(404).body(new ApiResponse<>("khong tim thay", null));
+        try {
+            VoucherResponse response = voucherService.update(id, request);
+            return ResponseEntity.ok(new ApiResponse<>("Cập nhật voucher thành công", response));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(new ApiResponse<>(e.getMessage(), null));
         }
-        return ResponseEntity.ok(new ApiResponse<>("cap nhat thanh cong", response));
     }
 
     @DeleteMapping("{id}")
-    public ResponseEntity<ApiResponse<Object>> deactivate(@PathVariable("id") UUID id) {
-        voucherService.deactivate(id);
-        return ResponseEntity.ok(new ApiResponse<>("xoa thanh cong", null));
+    public ResponseEntity<ApiResponse<Object>> deactivate(@PathVariable UUID id) {
+        try {
+            voucherService.deactivate(id);
+            return ResponseEntity.ok(new ApiResponse<>("Ngừng hoạt động voucher thành công", null));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body(new ApiResponse<>(e.getMessage(), null));
+        }
     }
 }
