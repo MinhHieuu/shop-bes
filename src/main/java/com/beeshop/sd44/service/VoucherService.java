@@ -2,10 +2,13 @@ package com.beeshop.sd44.service;
 
 import com.beeshop.sd44.dto.request.VoucherRequest;
 import com.beeshop.sd44.dto.response.VoucherResponse;
+import com.beeshop.sd44.entity.Order;
 import com.beeshop.sd44.entity.Voucher;
 import com.beeshop.sd44.repository.VoucherRepo;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -20,23 +23,28 @@ public class VoucherService {
     }
 
     public List<VoucherResponse> getAll() {
-        return voucherRepo.findAll()
-                .stream()
-                .map(this::buildResponse)
-                .toList();
+        List<Voucher> list = voucherRepo.findAll();
+        List<VoucherResponse> responses = new ArrayList<>();
+        for (Voucher voucher : list) {
+            responses.add(buildResponse(voucher));
+        }
+        return responses;
     }
 
     public List<VoucherResponse> search(String keyword, Integer trangThai) {
-        String kw = (keyword == null || keyword.isBlank()) ? null : keyword.trim();
-        return voucherRepo.searchVouchers(kw, trangThai)
-                .stream()
-                .map(this::buildResponse)
-                .toList();
+        String kw = (keyword == null || keyword.trim().isEmpty()) ? null : keyword.trim();
+        List<Voucher> list = voucherRepo.searchVouchers(kw, trangThai);
+
+        List<VoucherResponse> responses = new ArrayList<>();
+        for (Voucher voucher : list) {
+            responses.add(buildResponse(voucher));
+        }
+        return responses;
     }
 
     public Voucher getById(UUID id) {
         return voucherRepo.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy voucher"));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy voucher"));
     }
 
     public VoucherResponse getResponseById(UUID id) {
@@ -44,27 +52,29 @@ public class VoucherService {
     }
 
     public VoucherResponse create(VoucherRequest request) {
-        validateBusiness(request, null);
+        validateVoucherRequest(request);
 
-        if (voucherRepo.existsByMa(request.getMa().trim())) {
-            throw new IllegalArgumentException("Mã voucher đã tồn tại");
+        if (isCodeExists(request.getMa(), null)) {
+            throw new RuntimeException("Mã voucher đã tồn tại");
         }
 
         Voucher voucher = new Voucher();
-        mapRequestToEntity(voucher, request);
+        mapRequestToVoucher(voucher, request);
+
         return buildResponse(voucherRepo.save(voucher));
     }
 
     public VoucherResponse update(UUID id, VoucherRequest request) {
+        validateVoucherRequest(request);
+
         Voucher voucher = getById(id);
 
-        validateBusiness(request, id);
-
-        if (voucherRepo.existsByMaAndIdNot(request.getMa().trim(), id)) {
-            throw new IllegalArgumentException("Mã voucher đã tồn tại");
+        if (isCodeExists(request.getMa(), id)) {
+            throw new RuntimeException("Mã voucher đã tồn tại");
         }
 
-        mapRequestToEntity(voucher, request);
+        mapRequestToVoucher(voucher, request);
+
         return buildResponse(voucherRepo.save(voucher));
     }
 
@@ -75,44 +85,33 @@ public class VoucherService {
     }
 
     public Voucher getByMa(String ma) {
+        if (ma == null || ma.trim().isEmpty()) {
+            return null;
+        }
         return voucherRepo.findByMa(ma.trim()).orElse(null);
     }
 
     public Voucher validateAndGet(String voucherCode, double subTotal) {
         Voucher voucher = getByMa(voucherCode);
+
         if (voucher == null) {
-            throw new IllegalArgumentException("Mã giảm giá không tồn tại");
+            throw new RuntimeException("Mã giảm giá không tồn tại");
         }
 
-        if (voucher.getTrangThai() == null || voucher.getTrangThai() != 1) {
-            throw new IllegalArgumentException("Mã giảm giá không hoạt động");
-        }
-
-        Date now = new Date();
-
-        if (voucher.getNgayBatDau() != null && now.before(voucher.getNgayBatDau())) {
-            throw new IllegalArgumentException("Mã giảm giá chưa đến ngày sử dụng");
-        }
-
-        if (voucher.getNgayKetThuc() != null && now.after(voucher.getNgayKetThuc())) {
-            throw new IllegalArgumentException("Mã giảm giá đã hết hạn");
-        }
-
-        if (voucher.getToiThieu() != null && subTotal < voucher.getToiThieu()) {
-            throw new IllegalArgumentException(
-                    "Đơn hàng phải tối thiểu " + voucher.getToiThieu() + " để sử dụng mã này"
-            );
-        }
-
+        validateVoucherForOrder(voucher, subTotal);
         return voucher;
     }
 
     public double calculateDiscount(Voucher voucher, double subTotal) {
-        double discount;
+        double discount = 0;
+
+        if (voucher.getLoaiGiam() == null) {
+            return 0;
+        }
 
         if (voucher.getLoaiGiam() == 0) {
             discount = subTotal * voucher.getGiaTriGiam() / 100.0;
-        } else {
+        } else if (voucher.getLoaiGiam() == 1) {
             discount = voucher.getGiaTriGiam();
         }
 
@@ -127,42 +126,166 @@ public class VoucherService {
         return Math.max(discount, 0);
     }
 
-    private void validateBusiness(VoucherRequest request, UUID id) {
+    // =========================
+    // CHỨC NĂNG MỚI
+    // =========================
+
+    public List<VoucherResponse> getActiveVouchers() {
+        List<Voucher> all = voucherRepo.findAll();
+        List<VoucherResponse> responses = new ArrayList<>();
+
+        for (Voucher voucher : all) {
+            if (getRealStatus(voucher) == 1) {
+                responses.add(buildResponse(voucher));
+            }
+        }
+
+        return responses;
+    }
+
+    public List<VoucherResponse> getAvailableVouchersForOrder(double subTotal) {
+        List<Voucher> all = voucherRepo.findAll();
+        List<VoucherResponse> responses = new ArrayList<>();
+
+        for (Voucher voucher : all) {
+            if (canApplyVoucher(voucher, subTotal)) {
+                responses.add(buildResponse(voucher));
+            }
+        }
+
+        return responses;
+    }
+
+    public VoucherResponse getBestVoucherForOrder(double subTotal) {
+        List<Voucher> all = voucherRepo.findAll();
+
+        Voucher bestVoucher = all.stream()
+                .filter(v -> canApplyVoucher(v, subTotal))
+                .max(Comparator.comparingDouble(v -> calculateDiscount(v, subTotal)))
+                .orElse(null);
+
+        if (bestVoucher == null) {
+            return null;
+        }
+
+        return buildResponse(bestVoucher);
+    }
+
+    public boolean canApplyVoucher(Voucher voucher, double subTotal) {
+        try {
+            validateVoucherForOrder(voucher, subTotal);
+            return true;
+        } catch (RuntimeException e) {
+            return false;
+        }
+    }
+
+    public int getUsageCount(UUID voucherId) {
+        Voucher voucher = getById(voucherId);
+        return countUsedOrders(voucher);
+    }
+
+    public String getVoucherDisplayStatus(UUID voucherId) {
+        Voucher voucher = getById(voucherId);
+        return getDisplayStatus(voucher);
+    }
+
+    public int getVoucherRealStatus(UUID voucherId) {
+        Voucher voucher = getById(voucherId);
+        return getRealStatus(voucher);
+    }
+
+    // =========================
+    // PRIVATE
+    // =========================
+
+    private void validateVoucherRequest(VoucherRequest request) {
+        if (request == null) {
+            throw new RuntimeException("Dữ liệu voucher không được để trống");
+        }
+
+        if (request.getMa() == null || request.getMa().trim().isEmpty()) {
+            throw new RuntimeException("Mã voucher không được để trống");
+        }
+
+        if (request.getTen() == null || request.getTen().trim().isEmpty()) {
+            throw new RuntimeException("Tên voucher không được để trống");
+        }
+
         if (request.getLoaiGiam() == null || (request.getLoaiGiam() != 0 && request.getLoaiGiam() != 1)) {
-            throw new IllegalArgumentException("Loại giảm chỉ được là 0 hoặc 1");
+            throw new RuntimeException("Loại giảm phải là 0 hoặc 1");
+        }
+
+        if (request.getGiaTriGiam() == null || request.getGiaTriGiam() <= 0) {
+            throw new RuntimeException("Giá trị giảm phải lớn hơn 0");
+        }
+
+        if (request.getLoaiGiam() == 0 && request.getGiaTriGiam() > 100) {
+            throw new RuntimeException("Voucher phần trăm chỉ được từ 1 đến 100");
+        }
+
+        if (request.getToiThieu() == null || request.getToiThieu() < 0) {
+            throw new RuntimeException("Giá trị tối thiểu phải lớn hơn hoặc bằng 0");
+        }
+
+        if (request.getToiDa() != null && request.getToiDa() < 0) {
+            throw new RuntimeException("Giá trị giảm tối đa không được âm");
         }
 
         if (request.getNgayBatDau() != null && request.getNgayKetThuc() != null
                 && request.getNgayBatDau().after(request.getNgayKetThuc())) {
-            throw new IllegalArgumentException("Ngày bắt đầu không được lớn hơn ngày kết thúc");
-        }
-
-        if (request.getLoaiGiam() == 0) {
-            if (request.getGiaTriGiam() <= 0 || request.getGiaTriGiam() > 100) {
-                throw new IllegalArgumentException("Voucher giảm phần trăm phải từ 1 đến 100");
-            }
-        }
-
-        if (request.getLoaiGiam() == 1 && request.getGiaTriGiam() <= 0) {
-            throw new IllegalArgumentException("Voucher giảm tiền phải lớn hơn 0");
-        }
-
-        if (request.getToiDa() != null && request.getToiDa() < 0) {
-            throw new IllegalArgumentException("Giảm tối đa không được âm");
-        }
-
-        if (request.getToiThieu() != null && request.getToiThieu() < 0) {
-            throw new IllegalArgumentException("Giá trị tối thiểu không được âm");
+            throw new RuntimeException("Ngày bắt đầu không được lớn hơn ngày kết thúc");
         }
     }
 
-    private void mapRequestToEntity(Voucher voucher, VoucherRequest request) {
+    private void validateVoucherForOrder(Voucher voucher, double subTotal) {
+        if (voucher == null) {
+            throw new RuntimeException("Voucher không tồn tại");
+        }
+
+        if (voucher.getTrangThai() == null || voucher.getTrangThai() != 1) {
+            throw new RuntimeException("Voucher đang bị khóa");
+        }
+
+        Date now = new Date();
+
+        if (voucher.getNgayBatDau() != null && now.before(voucher.getNgayBatDau())) {
+            throw new RuntimeException("Voucher chưa đến ngày bắt đầu");
+        }
+
+        if (voucher.getNgayKetThuc() != null && now.after(voucher.getNgayKetThuc())) {
+            throw new RuntimeException("Voucher đã hết hạn");
+        }
+
+        if (voucher.getToiThieu() != null && subTotal < voucher.getToiThieu()) {
+            throw new RuntimeException("Đơn hàng chưa đạt giá trị tối thiểu");
+        }
+    }
+
+    private boolean isCodeExists(String ma, UUID currentId) {
+        if (ma == null || ma.trim().isEmpty()) {
+            return false;
+        }
+
+        Voucher existed = voucherRepo.findByMa(ma.trim()).orElse(null);
+        if (existed == null) {
+            return false;
+        }
+
+        if (currentId == null) {
+            return true;
+        }
+
+        return !existed.getId().equals(currentId);
+    }
+
+    private void mapRequestToVoucher(Voucher voucher, VoucherRequest request) {
         voucher.setMa(request.getMa().trim());
         voucher.setTen(request.getTen().trim());
         voucher.setLoaiGiam(request.getLoaiGiam());
-        voucher.setGiaTriGiam(request.getGiaTriGiam());
-        voucher.setToiThieu(request.getToiThieu());
         voucher.setToiDa(request.getToiDa());
+        voucher.setToiThieu(request.getToiThieu());
+        voucher.setGiaTriGiam(request.getGiaTriGiam());
         voucher.setTrangThai(request.getTrangThai());
         voucher.setNgayBatDau(request.getNgayBatDau());
         voucher.setNgayKetThuc(request.getNgayKetThuc());
@@ -174,12 +297,61 @@ public class VoucherService {
         response.setMa(voucher.getMa());
         response.setTen(voucher.getTen());
         response.setLoaiGiam(voucher.getLoaiGiam());
-        response.setGiaTriGiam(voucher.getGiaTriGiam());
-        response.setToiThieu(voucher.getToiThieu());
         response.setToiDa(voucher.getToiDa());
+        response.setToiThieu(voucher.getToiThieu());
+        response.setGiaTriGiam(voucher.getGiaTriGiam());
         response.setTrangThai(voucher.getTrangThai());
         response.setNgayBatDau(voucher.getNgayBatDau());
         response.setNgayKetThuc(voucher.getNgayKetThuc());
         return response;
+    }
+
+    private int getRealStatus(Voucher voucher) {
+        Date now = new Date();
+
+        if (voucher.getTrangThai() == null || voucher.getTrangThai() == 0) {
+            return 0; // bị khóa
+        }
+
+        if (voucher.getNgayBatDau() != null && now.before(voucher.getNgayBatDau())) {
+            return 2; // sắp diễn ra
+        }
+
+        if (voucher.getNgayKetThuc() != null && now.after(voucher.getNgayKetThuc())) {
+            return 3; // hết hạn
+        }
+
+        return 1; // đang hoạt động
+    }
+
+    private String getDisplayStatus(Voucher voucher) {
+        int status = getRealStatus(voucher);
+
+        switch (status) {
+            case 0:
+                return "Bị khóa";
+            case 1:
+                return "Đang hoạt động";
+            case 2:
+                return "Sắp diễn ra";
+            case 3:
+                return "Hết hạn";
+            default:
+                return "Không xác định";
+        }
+    }
+
+    private int countUsedOrders(Voucher voucher) {
+        if (voucher.getListOrder() == null) {
+            return 0;
+        }
+
+        int count = 0;
+        for (Order order : voucher.getListOrder()) {
+            if (order != null) {
+                count++;
+            }
+        }
+        return count;
     }
 }
