@@ -1,6 +1,7 @@
 package com.beeshop.sd44.controller;
 
 import ch.qos.logback.core.util.StringUtil;
+import com.beeshop.sd44.dto.request.ChangQuantityReq;
 import com.beeshop.sd44.dto.response.CartDetailResponse;
 import com.beeshop.sd44.dto.response.ProductDetailResponse;
 import com.beeshop.sd44.dto.response.ProductResponse;
@@ -115,5 +116,10 @@ public class HomePageController {
         UUID userId = UUID.fromString(authentication.getName());
         cartService.clearCart(userId);
         return ResponseEntity.ok().body(new ApiResponse<>("xoa gio hang thanh cong", null));
+    }
+
+    @PostMapping("change-quantity-product-detail")
+    public ResponseEntity<?> change(@RequestBody List<ChangQuantityReq> reqs){
+        return ResponseEntity.ok().body(new ApiResponse<>("cap nhat so luong thanh cong", productDetailService.changeQuantity(reqs)));
     }
 }
