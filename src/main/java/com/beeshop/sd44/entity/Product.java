@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -34,8 +35,8 @@ public class Product {
     @ManyToOne
     @JoinColumn(name = "thuong_hieu_id")
     private Brand brand;
-    @OneToMany(mappedBy = "product")
-    private List<ProductDetail> list;
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductDetail> list = new ArrayList<>();
 
     public UUID getId() {
         return id;

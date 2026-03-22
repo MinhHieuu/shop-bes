@@ -1,6 +1,9 @@
 package com.beeshop.sd44.dto.request;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.Date;
 
@@ -12,21 +15,25 @@ public class VoucherRequest {
     @NotBlank(message = "Tên voucher không được để trống")
     private String ten;
 
+    /**
+     * 0 = giảm theo %
+     * 1 = giảm theo tiền
+     */
     @NotNull(message = "Loại giảm không được để trống")
     private Integer loaiGiam;
 
     @NotNull(message = "Giá trị giảm không được để trống")
+    @Min(value = 1, message = "Giá trị giảm phải lớn hơn 0")
     private Integer giaTriGiam;
 
     @NotNull(message = "Giá trị tối thiểu không được để trống")
+    @Min(value = 0, message = "Giá trị tối thiểu không được âm")
     private Integer toiThieu;
 
-    // nullable — nếu có thì phải >= toiThieu (kiểm tra bằng @ToiDaHopLe)
     @Min(value = 0, message = "Giảm tối đa không được âm")
     private Integer toiDa;
 
     @NotNull(message = "Trạng thái không được để trống")
-
     private Integer trangThai;
 
     private Date ngayBatDau;
@@ -57,12 +64,12 @@ public class VoucherRequest {
         this.loaiGiam = loaiGiam;
     }
 
-    public Integer getToiDa() {
-        return toiDa;
+    public Integer getGiaTriGiam() {
+        return giaTriGiam;
     }
 
-    public void setToiDa(Integer toiDa) {
-        this.toiDa = toiDa;
+    public void setGiaTriGiam(Integer giaTriGiam) {
+        this.giaTriGiam = giaTriGiam;
     }
 
     public Integer getToiThieu() {
@@ -73,12 +80,12 @@ public class VoucherRequest {
         this.toiThieu = toiThieu;
     }
 
-    public Integer getGiaTriGiam() {
-        return giaTriGiam;
+    public Integer getToiDa() {
+        return toiDa;
     }
 
-    public void setGiaTriGiam(Integer giaTriGiam) {
-        this.giaTriGiam = giaTriGiam;
+    public void setToiDa(Integer toiDa) {
+        this.toiDa = toiDa;
     }
 
     public Integer getTrangThai() {

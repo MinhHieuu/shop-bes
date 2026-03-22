@@ -1,6 +1,6 @@
 package com.beeshop.sd44.dto.response;
 
-public class LowStockProduct {
+public interface LowStockProduct {
     String getProductName();
     String getColorName();
     String getSizeName();

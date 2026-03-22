@@ -16,6 +16,7 @@ import java.util.Date;
 @RestController
 @RequestMapping("/api/statistics")
 public class StatisticController {
+
     @Autowired
     private StatisticService statisticService;
 
@@ -23,7 +24,7 @@ public class StatisticController {
     public ResponseEntity<ApiResponse<StatisticResponse>> getDashboardStatistics(
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date fromDate,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date toDate) {
-
+        
         StatisticResponse stats = statisticService.getAdminDashboardStatistics(fromDate, toDate);
         return ResponseEntity.ok(new ApiResponse<>("Lấy thống kê thành công", stats));
     }

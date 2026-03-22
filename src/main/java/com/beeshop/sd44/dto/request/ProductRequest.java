@@ -1,5 +1,6 @@
 package com.beeshop.sd44.dto.request;
 
+import java.util.List;
 import java.util.UUID;
 
 public class ProductRequest {
@@ -9,6 +10,20 @@ public class ProductRequest {
     private Integer status;
     private UUID marterialId;
     private UUID brandId;
+    private List<ProductDetailRequest> productDetails;
+    private List<ProductDetailRequest> productDetailsUpdate;
+
+    public List<ProductDetailRequest> getProductDetailsUpdate() {
+        return productDetailsUpdate;
+    }
+
+    public List<ProductDetailRequest> getProductDetails() {
+        return productDetails;
+    }
+
+    public void setProductDetails(List<ProductDetailRequest> productDetails) {
+        this.productDetails = productDetails;
+    }
 
     public UUID getId() {
         return id;

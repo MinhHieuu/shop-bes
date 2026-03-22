@@ -127,6 +127,7 @@ public class VoucherService {
         if (discount > subTotal) {
             discount = subTotal;
         }
+
         return discount;
     }
 

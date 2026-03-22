@@ -2,8 +2,7 @@ package com.beeshop.sd44.dto.response;
 
 import java.util.Date;
 
-public class DailyRevenue {
-
+public interface DailyRevenue {
     Date getDate();
     Double getRevenue();
 }

@@ -8,10 +8,7 @@ import com.beeshop.sd44.dto.response.OrderResponse;
 import com.beeshop.sd44.dto.response.ProductDetailResponse;
 import com.beeshop.sd44.dto.response.UserResponse;
 import com.beeshop.sd44.entity.*;
-import com.beeshop.sd44.repository.CartDetailRepo;
-import com.beeshop.sd44.repository.CartRepo;
-import com.beeshop.sd44.repository.OrderDetailRepo;
-import com.beeshop.sd44.repository.OrderRepo;
+import com.beeshop.sd44.repository.*;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,10 +31,11 @@ public class OrderService {
     private final VoucherService voucherService;
     private final CartDetailRepo cartDetailRepo;
     private final NotificationService notificationService;
-
+    private final ProductDetailRepo pdRepo;
     public OrderService(OrderRepo orderRepo, OrderDetailRepo orderDetailRepo, UserService userService,
             CustomerService customerService, ProductDetailService productDetailService,
             VoucherService voucherService, CartDetailRepo cartDetailRepo,
+            ProductDetailRepo pdRepo,
             NotificationService notificationService) {
         this.orderDetailRepo = orderDetailRepo;
         this.orderRepo = orderRepo;
@@ -47,6 +45,7 @@ public class OrderService {
         this.voucherService = voucherService;
         this.cartDetailRepo = cartDetailRepo;
         this.notificationService = notificationService;
+        this.pdRepo = pdRepo;
     }
 
     /**
@@ -128,7 +127,7 @@ public class OrderService {
             orderDetail.setPrice(productDetail.getSalePrice());
             orderDetailRepo.save(orderDetail);
             // Trừ tồn kho
-            productDetail.setQuantity(productDetail.getQuantity() - pdRequest.getQuantity());
+//            productDetail.setQuantity(productDetail.getQuantity() - pdRequest.getQuantity());
             cartIdsToDelete.add(productDetail.getId());
         }
 
@@ -146,6 +145,13 @@ public class OrderService {
         return buildOrderResponse(order, subTotal, discount);
     }
 
+    void minusOrder(Order order){
+        for (OrderDetail item : order.getDetailList()) {
+            ProductDetail productDetail = item.getProductDetail();
+            productDetail.setQuantity(productDetail.getQuantity() - item.getQuantity());
+            pdRepo.save(productDetail);
+        }
+    }
     @Transactional
     public OrderResponse handleCounterOrder(EmployeeOrderRequest orderRequest, UUID employeeId) {
         // 1. Tính tổng tiền hàng (subTotal) để check voucher
@@ -186,6 +192,14 @@ public class OrderService {
             orderDetail.setProductDetail(productDetail);
             orderDetail.setQuantity(pdRequest.getQuantity());
             orderDetail.setPrice(productDetail.getSalePrice());
+
+            if(productDetail.getQuantity() - pdRequest.getQuantity() < 0){
+                throw new RuntimeException("So luong san pham trong kho da het");
+            }
+// tru so luong di
+            productDetail.setQuantity(productDetail.getQuantity() - pdRequest.getQuantity());
+
+
             orderDetailRepo.save(orderDetail);
         }
         return buildOrderResponse(order, subTotal, discount);
@@ -229,11 +243,15 @@ public class OrderService {
         return this.orderRepo.save(order);
     }
 
+    @Transactional
     public Order updatePaymentStatus(UUID orderId, Integer paymentStatus) {
         Order order = getOrderById(orderId);
         if (order != null) {
             order.setPaymentStatus(paymentStatus);
             order.setPaymentDate(new Date());
+            if(order.getType() == 1 && paymentStatus == 1){
+                updateOrderStatus(orderId, 1);
+            }
             return orderRepo.save(order);
         }
         return null;
@@ -400,13 +418,15 @@ public class OrderService {
         // Khi xác nhận đơn (status = 1), ghi lại người xác nhận vào nguoi_dung_id
         if (status == 1 && operatorId != null) {
             order.setUser(userService.getUserById(operatorId));
+            // tru so luong
+
         }
 
         // Lưu order trước khi xử lý số lượng
         Order saved = orderRepo.save(order);
 
         // Nếu đơn bị hủy (status = 3) -> hoàn trả lại tồn kho cho các product detail
-        if (status == 3) {
+        if (status == 3 || status == 1) {
             handleQuantity(saved);
         }
 
