@@ -111,7 +111,7 @@ public class OrderService {
             order.setStatus(0); // chờ xác nhận
         } else if ("VNPAY".equals(orderRequest.getPaymentMethod())) {
             order.setPaymentStatus(0); // đang thanh toán
-            order.setStatus(0); // đã xác nhận
+            order.setStatus(1); // đã xác nhận
         }
 
         order = this.orderRepo.save(order);
@@ -431,6 +431,7 @@ public class OrderService {
 
         // neu thanh toan tai quay vnpay da tru roi nen k tru nua
         if(status == 1 && order.getType() == 1){
+            handleQuantity(saved);
             return saved;
         }
 
