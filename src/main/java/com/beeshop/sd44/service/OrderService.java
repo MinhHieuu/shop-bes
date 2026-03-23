@@ -26,13 +26,6 @@ public class OrderService {
     private final CartDetailRepo cartDetailRepo;
     private final NotificationService notificationService;
 
-    private final ProductDetailRepo pdRepo;
-    public OrderService(OrderRepo orderRepo, OrderDetailRepo orderDetailRepo, UserService userService,
-            CustomerService customerService, ProductDetailService productDetailService,
-            VoucherService voucherService, CartDetailRepo cartDetailRepo,
-            ProductDetailRepo pdRepo,
-            NotificationService notificationService) {
-
     private final CartRepo cartRepo;
     private final ProductDetailRepo productDetailRepo;
 
@@ -50,7 +43,7 @@ public class OrderService {
         this.cartDetailRepo = cartDetailRepo;
         this.notificationService = notificationService;
 
-        this.pdRepo = pdRepo;
+//        this.pdRepo = pdRepo;
 
         this.cartRepo = cartRepo;
         this.productDetailRepo = productDetailRepo;
@@ -158,7 +151,7 @@ public class OrderService {
         for (OrderDetail item : order.getDetailList()) {
             ProductDetail productDetail = item.getProductDetail();
             productDetail.setQuantity(productDetail.getQuantity() - item.getQuantity());
-            pdRepo.save(productDetail);
+//            pdRepo.save(productDetail);
         }
     }
     @Transactional
