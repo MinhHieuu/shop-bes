@@ -1,17 +1,12 @@
 package com.beeshop.sd44.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
+import com.beeshop.sd44.dto.request.CartRequest;
+import com.beeshop.sd44.entity.*;
 import org.springframework.stereotype.Service;
 
 import com.beeshop.sd44.dto.response.CartDetailResponse;
-import com.beeshop.sd44.entity.Cart;
-import com.beeshop.sd44.entity.CartDetail;
-import com.beeshop.sd44.entity.ProductDetail;
-import com.beeshop.sd44.entity.User;
 import com.beeshop.sd44.repository.CartDetailRepo;
 import com.beeshop.sd44.repository.CartRepo;
 
@@ -127,4 +122,8 @@ public class CartService {
         response.setTotalPrice(cartDetail.getPrice() * cartDetail.getQuantity());
         return response;
     }
+
+
+
+
 }

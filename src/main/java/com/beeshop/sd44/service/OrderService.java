@@ -1,9 +1,6 @@
 package com.beeshop.sd44.service;
 
-import com.beeshop.sd44.dto.request.EmployeeOrderRequest;
-import com.beeshop.sd44.dto.request.OrderFilterRequest;
-import com.beeshop.sd44.dto.request.OrderRequest;
-import com.beeshop.sd44.dto.request.ProductDetailRequest;
+import com.beeshop.sd44.dto.request.*;
 import com.beeshop.sd44.dto.response.OrderResponse;
 import com.beeshop.sd44.dto.response.ProductDetailResponse;
 import com.beeshop.sd44.dto.response.UserResponse;
@@ -14,10 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class OrderService {
@@ -31,12 +25,22 @@ public class OrderService {
     private final VoucherService voucherService;
     private final CartDetailRepo cartDetailRepo;
     private final NotificationService notificationService;
+
     private final ProductDetailRepo pdRepo;
     public OrderService(OrderRepo orderRepo, OrderDetailRepo orderDetailRepo, UserService userService,
             CustomerService customerService, ProductDetailService productDetailService,
             VoucherService voucherService, CartDetailRepo cartDetailRepo,
             ProductDetailRepo pdRepo,
             NotificationService notificationService) {
+
+    private final CartRepo cartRepo;
+    private final ProductDetailRepo productDetailRepo;
+
+    public OrderService(OrderRepo orderRepo, OrderDetailRepo orderDetailRepo, UserService userService,
+                        CustomerService customerService, ProductDetailService productDetailService,
+                        VoucherService voucherService, CartDetailRepo cartDetailRepo,
+                        NotificationService notificationService, CartRepo cartRepo, ProductDetailRepo productDetailRepo) {
+
         this.orderDetailRepo = orderDetailRepo;
         this.orderRepo = orderRepo;
         this.userService = userService;
@@ -45,7 +49,12 @@ public class OrderService {
         this.voucherService = voucherService;
         this.cartDetailRepo = cartDetailRepo;
         this.notificationService = notificationService;
+
         this.pdRepo = pdRepo;
+
+        this.cartRepo = cartRepo;
+        this.productDetailRepo = productDetailRepo;
+
     }
 
     /**
@@ -456,5 +465,74 @@ public class OrderService {
             productDetailService.updateQuantity(orderDetail.getProductDetail().getId(), order.getStatus(),
                     orderDetail.getQuantity());
         }
+    }
+
+
+    public void addToCart(CartRequest request) {
+
+        Order order = orderRepo
+                .findByCustomerIdAndStatus(request.getCustomerId(), 0)
+                .orElseGet(() -> {
+
+                    Order newOrder = new Order();
+
+                    // set customer đúng cách
+                    Customer customer = new Customer();
+                    customer.setId(request.getCustomerId()); // ⭐ QUAN TRỌNG
+
+                    newOrder.setCustomer(customer);
+                    newOrder.setStatus(0);
+                    newOrder.setCreatedAt(new Date());
+                    newOrder.setTotal(0.0);
+
+                    return orderRepo.save(newOrder);
+                });
+
+        ProductDetail productDetail = productDetailRepo
+                .findById(request.getProductDetailId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
+
+        if (productDetail.getQuantity() < request.getQuantity()) {
+            throw new RuntimeException("Sản phẩm không đủ số lượng");
+        }
+
+        Optional<OrderDetail> optional = orderDetailRepo
+                .findByOrderIdAndProductDetailId(order.getId(), productDetail.getId());
+
+        OrderDetail detail;
+
+        if (optional.isPresent()) {
+
+            detail = optional.get();
+
+            int newQuantity = detail.getQuantity() + request.getQuantity();
+
+            if (newQuantity > productDetail.getQuantity()) {
+                throw new RuntimeException("Vượt quá tồn kho");
+            }
+
+            detail.setQuantity(newQuantity);
+
+        } else {
+
+            detail = new OrderDetail();
+            detail.setOrder(order);
+            detail.setProductDetail(productDetail);
+            detail.setQuantity(request.getQuantity());
+            detail.setPrice(productDetail.getSalePrice());
+        }
+
+        orderDetailRepo.save(detail);
+
+        List<OrderDetail> list = orderDetailRepo.findByOrderId(order.getId());
+
+        double total = 0;
+
+        for (OrderDetail d : list) {
+            total += d.getPrice() * d.getQuantity();
+        }
+
+        order.setTotal(total);
+        orderRepo.save(order);
     }
 }

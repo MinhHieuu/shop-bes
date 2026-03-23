@@ -13,5 +13,5 @@ import com.beeshop.sd44.entity.Cart;
 public interface CartRepo extends JpaRepository<Cart, UUID> {
     Optional<Cart> findByUser_Id(UUID userId);
 
-
+    Optional<Cart> findByCustomerIdAndStatus(UUID customerId, Integer status);
 }

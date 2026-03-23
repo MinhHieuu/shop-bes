@@ -1,5 +1,6 @@
 package com.beeshop.sd44.controller;
 
+import com.beeshop.sd44.dto.request.CartRequest;
 import com.beeshop.sd44.dto.request.OrderRequest;
 import com.beeshop.sd44.dto.response.OrderResponse;
 import com.beeshop.sd44.dto.response.VNPayResponse;
@@ -168,4 +169,12 @@ public class OrderController {
         return ResponseEntity.ok(new ApiResponse<>("lay thanh cong", orders));
     }
 
+    /***/
+    @PostMapping("/cart/add")
+    public ResponseEntity<?> addToCart(@RequestBody CartRequest request) {
+
+        orderService.addToCart(request);
+
+        return ResponseEntity.ok("Thêm vào giỏ hàng thành công");
+    }
 }

@@ -98,4 +98,6 @@ public interface OrderRepo extends JpaRepository<Order, UUID> {
               AND (:toDate IS NULL OR ngay_tao <= :toDate)
 			""", nativeQuery = true)
 	Long getTotalOrders(@Param("fromDate") Date fromDate, @Param("toDate") Date toDate);
+
+    Optional<Order> findByCustomerIdAndStatus(UUID customerId, Integer status);
 }
