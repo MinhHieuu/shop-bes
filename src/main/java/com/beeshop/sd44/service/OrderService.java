@@ -99,6 +99,7 @@ public class OrderService {
         order.setCreatedAt(new Date());
         order.setType(1); // 1 = online
         order.setPaymentDate(new Date());
+        order.setAddress(orderRequest.getAddress());
         order.setPaymentMethod(orderRequest.getPaymentMethod());
         order.setNote(orderRequest.getNote());
         order.setShippingFee(shippingFee);
@@ -111,7 +112,7 @@ public class OrderService {
             order.setStatus(0); // chờ xác nhận
         } else if ("VNPAY".equals(orderRequest.getPaymentMethod())) {
             order.setPaymentStatus(0); // đang thanh toán
-            order.setStatus(0); // đã xác nhận
+            order.setStatus(1); // đã xác nhận
         }
 
         order = this.orderRepo.save(order);
@@ -285,6 +286,7 @@ public class OrderService {
         response.setTotal(order.getTotal());
         response.setType(order.getType());
         response.setStatus(order.getStatus());
+        response.setAddress(order.getAddress());
 
         response.setPaymentStatus(order.getPaymentStatus());
         response.setPaymentMethod(order.getPaymentMethod());
@@ -431,6 +433,7 @@ public class OrderService {
 
         // neu thanh toan tai quay vnpay da tru roi nen k tru nua
         if(status == 1 && order.getType() == 1){
+            handleQuantity(saved);
             return saved;
         }
 
