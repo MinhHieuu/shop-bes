@@ -99,6 +99,7 @@ public class OrderService {
         order.setCreatedAt(new Date());
         order.setType(1); // 1 = online
         order.setPaymentDate(new Date());
+        order.setAddress(orderRequest.getAddress());
         order.setPaymentMethod(orderRequest.getPaymentMethod());
         order.setNote(orderRequest.getNote());
         order.setShippingFee(shippingFee);
@@ -285,6 +286,7 @@ public class OrderService {
         response.setTotal(order.getTotal());
         response.setType(order.getType());
         response.setStatus(order.getStatus());
+        response.setAddress(order.getAddress());
 
         response.setPaymentStatus(order.getPaymentStatus());
         response.setPaymentMethod(order.getPaymentMethod());
