@@ -1,5 +1,6 @@
 package com.beeshop.sd44.service;
 
+import com.beeshop.sd44.dto.request.ChangQuantityReq;
 import com.beeshop.sd44.dto.request.ProductDetailRequest;
 import com.beeshop.sd44.dto.response.ProductDetailResponse;
 import com.beeshop.sd44.dto.response.ProductSale;
@@ -186,9 +187,7 @@ public class ProductDetailService {
         ProductDetail productDetail = getById(id);
         if (productDetail == null)
             return;
-        if (productDetail.getQuantity() < quantity)
-            return;
-        // If order is confirmed/processed (status == 1), decrease stock by ordered
+
         // quantity
         if (status == 1) {
             productDetail.setQuantity(productDetail.getQuantity() - quantity);
@@ -201,4 +200,23 @@ public class ProductDetailService {
         this.productDetailRepo.save(productDetail);
     }
 
+    @Transactional
+    public List<ChangQuantityReq> changeQuantity(List<ChangQuantityReq> reqs){
+        List<ChangQuantityReq> res = new ArrayList<>();
+        for(ChangQuantityReq it: reqs){
+            ProductDetail productDetail = productDetailRepo.getById(it.getId());
+
+            if(productDetail.getQuantity() + it.getQuantity() < 0){
+                throw new RuntimeException("san pham da het so luong");
+            }
+            productDetail.setQuantity(productDetail.getQuantity() + it.getQuantity());
+            productDetailRepo.save(productDetail);
+
+            ChangQuantityReq itRes = new ChangQuantityReq();
+            itRes.setId(productDetail.getId());
+            itRes.setQuantity(productDetail.getQuantity());
+            res.add(itRes);
+        }
+        return res;
+    }
 }

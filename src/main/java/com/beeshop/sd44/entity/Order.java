@@ -34,6 +34,10 @@ public class Order {
     private Integer status;
     @Column(name = "trang_thai_thanh_toan")
     private Integer paymentStatus;
+
+    @Column(name = "dia_chi")
+    private String address;
+
     @Column(name = "phan_loai")
     private Integer type;
     @ManyToOne
@@ -162,6 +166,14 @@ public class Order {
 
     public Integer getPaymentStatus() {
         return paymentStatus;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public void setPaymentStatus(Integer paymentStatus) {

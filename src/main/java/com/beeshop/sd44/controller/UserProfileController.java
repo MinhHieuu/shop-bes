@@ -84,4 +84,10 @@ public class UserProfileController {
 
         return ResponseEntity.ok(new ApiResponse<>("lay thanh cong", orderService.getOrderResponseById(orderId)));
     }
+
+    @PostMapping("orders/cancel/{id}")
+    public void cancelOrderByUser(@PathVariable("id") String id) {
+        UUID orderId = UUID.fromString(id);
+        orderService.updateOrderStatus(orderId, 3);
+    }
 }

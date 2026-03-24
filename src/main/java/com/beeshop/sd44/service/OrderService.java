@@ -66,10 +66,10 @@ public class OrderService {
             if (pdRequest.getQuantity() == null || pdRequest.getQuantity() <= 0) {
                 throw new IllegalArgumentException("So luong phai lon hon 0");
             }
-            if (pdRequest.getQuantity() > productDetail.getQuantity()) {
-                throw new IllegalArgumentException("San pham " + productDetail.getProduct().getName()
-                        + " chi con " + productDetail.getQuantity() + " san pham");
-            }
+//            if (pdRequest.getQuantity() > productDetail.getQuantity() ) {
+//                throw new IllegalArgumentException("San pham " + productDetail.getProduct().getName()
+//                        + " chi con " + productDetail.getQuantity() + " san pham");
+//            }
             subTotal += productDetail.getSalePrice() * pdRequest.getQuantity();
         }
 
@@ -99,6 +99,7 @@ public class OrderService {
         order.setCreatedAt(new Date());
         order.setType(1); // 1 = online
         order.setPaymentDate(new Date());
+        order.setAddress(orderRequest.getAddress());
         order.setPaymentMethod(orderRequest.getPaymentMethod());
         order.setNote(orderRequest.getNote());
         order.setShippingFee(shippingFee);
@@ -111,7 +112,7 @@ public class OrderService {
             order.setStatus(0); // chờ xác nhận
         } else if ("VNPAY".equals(orderRequest.getPaymentMethod())) {
             order.setPaymentStatus(0); // đang thanh toán
-            order.setStatus(0); // đã xác nhận
+            order.setStatus(1); // đã xác nhận
         }
 
         order = this.orderRepo.save(order);
@@ -193,11 +194,11 @@ public class OrderService {
             orderDetail.setQuantity(pdRequest.getQuantity());
             orderDetail.setPrice(productDetail.getSalePrice());
 
-            if(productDetail.getQuantity() - pdRequest.getQuantity() < 0){
-                throw new RuntimeException("So luong san pham trong kho da het");
-            }
-// tru so luong di
-            productDetail.setQuantity(productDetail.getQuantity() - pdRequest.getQuantity());
+//            if(productDetail.getQuantity() - pdRequest.getQuantity() < 0){
+//                throw new RuntimeException("So luong san pham trong kho da het");
+//            }
+//// tru so luong di
+//            productDetail.setQuantity(productDetail.getQuantity() - pdRequest.getQuantity());
 
 
             orderDetailRepo.save(orderDetail);
@@ -221,6 +222,7 @@ public class OrderService {
         if (type == null) {
             type = 0; // 0 = tại quầy (mặc định)
         }
+        order.setCode("HD" + String.format("%03d", orderRepo.count()));
         order.setType(type);
         order.setPaymentDate(new Date());
         order.setPaymentMethod(orderRequest.getPaymentMethod());
@@ -284,6 +286,7 @@ public class OrderService {
         response.setTotal(order.getTotal());
         response.setType(order.getType());
         response.setStatus(order.getStatus());
+        response.setAddress(order.getAddress());
 
         response.setPaymentStatus(order.getPaymentStatus());
         response.setPaymentMethod(order.getPaymentMethod());
@@ -409,6 +412,7 @@ public class OrderService {
      * Nếu status = 1 (đã xác nhận) và operatorId không null → set nguoi_dung_id =
      * người xác nhận.
      */
+    @Transactional
     public Order updateOrderStatus(UUID orderId, Integer status, UUID operatorId) {
         Order order = getOrderById(orderId);
         if (order == null) {
@@ -419,11 +423,19 @@ public class OrderService {
         if (status == 1 && operatorId != null) {
             order.setUser(userService.getUserById(operatorId));
             // tru so luong
+            if(order.getPaymentMethod().equals("COD")){
 
+            }
         }
 
         // Lưu order trước khi xử lý số lượng
         Order saved = orderRepo.save(order);
+
+        // neu thanh toan tai quay vnpay da tru roi nen k tru nua
+        if(status == 1 && order.getType() == 1){
+            handleQuantity(saved);
+            return saved;
+        }
 
         // Nếu đơn bị hủy (status = 3) -> hoàn trả lại tồn kho cho các product detail
         if (status == 3 || status == 1) {
