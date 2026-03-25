@@ -1,16 +1,18 @@
 package com.beeshop.sd44.service;
 
 import com.beeshop.sd44.dto.request.*;
-import com.beeshop.sd44.dto.response.OrderResponse;
-import com.beeshop.sd44.dto.response.ProductDetailResponse;
-import com.beeshop.sd44.dto.response.UserResponse;
+import com.beeshop.sd44.dto.response.*;
 import com.beeshop.sd44.entity.*;
 import com.beeshop.sd44.repository.*;
 import jakarta.transaction.Transactional;
+import org.hibernate.query.Page;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.awt.print.Pageable;
 import java.util.*;
 
 @Service
@@ -101,6 +103,7 @@ public class OrderService {
         order.setCreatedAt(new Date());
         order.setType(1); // 1 = online
         order.setPaymentDate(new Date());
+        order.setAddress(orderRequest.getAddress());
         order.setPaymentMethod(orderRequest.getPaymentMethod());
         order.setNote(orderRequest.getNote());
         order.setShippingFee(shippingFee);
@@ -113,7 +116,7 @@ public class OrderService {
             order.setStatus(0); // chờ xác nhận
         } else if ("VNPAY".equals(orderRequest.getPaymentMethod())) {
             order.setPaymentStatus(0); // đang thanh toán
-            order.setStatus(0); // đã xác nhận
+            order.setStatus(1); // đã xác nhận
         }
 
         order = this.orderRepo.save(order);
@@ -287,6 +290,7 @@ public class OrderService {
         response.setTotal(order.getTotal());
         response.setType(order.getType());
         response.setStatus(order.getStatus());
+        response.setAddress(order.getAddress());
 
         response.setPaymentStatus(order.getPaymentStatus());
         response.setPaymentMethod(order.getPaymentMethod());
@@ -433,6 +437,7 @@ public class OrderService {
 
         // neu thanh toan tai quay vnpay da tru roi nen k tru nua
         if(status == 1 && order.getType() == 1){
+            handleQuantity(saved);
             return saved;
         }
 
@@ -528,4 +533,59 @@ public class OrderService {
         order.setTotal(total);
         orderRepo.save(order);
     }
+
+    public Page<Order> getAllOrders(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return orderRepo.findAllByOrderByCreatedAtDesc(pageable);
+    }
+
+    public Page<Order> filterOrdersPage(
+            Integer status,
+            Integer paymentStatus,
+            Integer type,
+            String paymentMethod,
+            Date fromDate,
+            Date toDate,
+            int page,
+            int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        return orderRepo.filterOrdersPage(
+                status, paymentStatus, type, paymentMethod, fromDate, toDate, pageable
+        );
+    }
+
+    public List<Order> getByCustomer(UUID customerId) {
+        return orderRepo.findByCustomerIdOrderByCreatedAtDesc(customerId);
+    }
+
+    public List<Order> getByUser(UUID userId) {
+        return orderRepo.findByUserIdOrderByCreatedAtDesc(userId);
+    }
+
+    public Order getDetail(UUID customerId, UUID orderId) {
+        return orderRepo.findByCustomerIdAndId(customerId, orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+    }
+
+    public Long getTotalOrders(Date fromDate, Date toDate) {
+        return orderRepo.getTotalOrders(fromDate, toDate);
+    }
+
+    public List<DailyRevenue> getTotalRevenue(Date fromDate, Date toDate) {
+        return orderRepo.getRevenueByDate(fromDate, toDate);
+    }
+
+    public List<BestSellingProduct> getBestSelling(Date fromDate, Date toDate) {
+        return orderRepo.getBestSellingProducts(fromDate, toDate);
+    }
+    public List<ProductSale> getTopSale(String productId) {
+        return orderRepo.getListSaler(productId);
+    }
+
+    public List<ProductSale> getTopSaleByProduct(String productId) {
+        return orderRepo.getListSalerByProductId(productId);
+    }
+
 }

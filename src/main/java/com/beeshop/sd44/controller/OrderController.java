@@ -9,6 +9,7 @@ import com.beeshop.sd44.entity.ApiResponse;
 import com.beeshop.sd44.entity.Customer;
 import com.beeshop.sd44.entity.Order;
 import com.beeshop.sd44.entity.Voucher;
+import com.beeshop.sd44.repository.OrderRepo;
 import com.beeshop.sd44.service.CustomerService;
 import com.beeshop.sd44.service.InvoicePdfService;
 import com.beeshop.sd44.service.NotificationService;
@@ -20,6 +21,9 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.hibernate.query.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -27,7 +31,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.awt.print.Pageable;
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -177,4 +183,85 @@ public class OrderController {
 
         return ResponseEntity.ok("Thêm vào giỏ hàng thành công");
     }
+
+    @GetMapping("/page")
+    public ResponseEntity<?> getAllPage(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(orderService.getAllOrders(page, size));
+    }
+
+
+    @GetMapping("/filter-page")
+    public ResponseEntity<?> filterPage(
+            @RequestParam(required = false) Integer status,
+            @RequestParam(required = false) Integer paymentStatus,
+            @RequestParam(required = false) Integer type,
+            @RequestParam(required = false) String paymentMethod,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date fromDate,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date toDate,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(
+                orderService.filterOrdersPage(
+                        status, paymentStatus, type, paymentMethod, fromDate, toDate, page, size
+                )
+        );
+    }
+
+    @GetMapping("/cus/{customerId}")
+    public ResponseEntity<?> getByCustomer(@PathVariable UUID customerId) {
+        return ResponseEntity.ok(orderService.getByCustomer(customerId));
+    }
+
+    @GetMapping("/us/{userId}")
+    public ResponseEntity<?> getByUser(@PathVariable UUID userId) {
+        return ResponseEntity.ok(orderService.getByUser(userId));
+    }
+
+    @GetMapping("/{cusId}/{orderId}")
+    public ResponseEntity<?> detail(
+            @PathVariable UUID customerId,
+            @PathVariable UUID orderId
+    ) {
+        return ResponseEntity.ok(orderService.getDetail(customerId, orderId));
+    }
+
+    @GetMapping("/total")
+    public ResponseEntity<?> total(
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date fromDate,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date toDate
+    ) {
+        return ResponseEntity.ok(orderService.getTotalOrders(fromDate, toDate));
+    }
+
+    @GetMapping("/revenue")
+    public ResponseEntity<?> revenue(
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date fromDate,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date toDate
+    ) {
+        return ResponseEntity.ok(orderService.getTotalRevenue(fromDate, toDate));
+    }
+
+    @GetMapping("/b-s")
+    public ResponseEntity<?> bestSelling(
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date fromDate,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date toDate
+    ) {
+        return ResponseEntity.ok(orderService.getBestSelling(fromDate, toDate));
+    }
+
+    @GetMapping("/t-s")
+    public ResponseEntity<?> topSale(@RequestParam(required = false) String productId) {
+        return ResponseEntity.ok(orderService.getTopSale(productId));
+    }
+
+    @GetMapping("/t-s-detail")
+    public ResponseEntity<?> topSaleDetail(@RequestParam(required = false) String productId) {
+        return ResponseEntity.ok(orderService.getTopSaleByProduct(productId));
+    }
+
+
 }

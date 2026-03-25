@@ -5,6 +5,7 @@ import com.beeshop.sd44.entity.Size;
 import com.beeshop.sd44.service.SizeService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,9 +15,11 @@ import java.util.UUID;
 @RequestMapping("/api/admin")
 public class SizeController {
     private final SizeService service;
+
     public SizeController(SizeService service) {
         this.service = service;
     }
+
     @GetMapping("size")
     public ResponseEntity<?> getAll(){
         List<Size> list = this.service.getAll();
@@ -24,7 +27,16 @@ public class SizeController {
     }
 
     @PostMapping("size")
-    public ResponseEntity<?> create(@Valid @RequestBody Size size) {
+    public ResponseEntity<?> create(@Valid @RequestBody Size size, BindingResult result) {
+        // Kiểm tra lỗi từ @Valid
+        if (result.hasErrors()) {
+            return ResponseEntity.badRequest().body(new ApiResponse<>(result.getAllErrors().get(0).getDefaultMessage(), null));
+        }
+        // Kiểm tra tên rỗng hoặc null
+        if (size.getName() == null || size.getName().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(new ApiResponse<>("Tên kích thước không được để trống", null));
+        }
+
         boolean exitsSize = this.service.isNameExit(size.getName());
         if(exitsSize) {
             return ResponseEntity.status(409).body(new ApiResponse<>("da ton tai", null));
@@ -44,8 +56,18 @@ public class SizeController {
     }
 
     @PutMapping("size/{id}")
-    public ResponseEntity<?> update (@PathVariable("id")UUID id,
-                                     @Valid @RequestBody Size newSize) {
+    public ResponseEntity<?> update (@PathVariable("id") UUID id,
+                                     @Valid @RequestBody Size newSize,
+                                     BindingResult result) {
+        // Kiểm tra lỗi từ @Valid
+        if (result.hasErrors()) {
+            return ResponseEntity.badRequest().body(new ApiResponse<>(result.getAllErrors().get(0).getDefaultMessage(), null));
+        }
+        // Kiểm tra tên rỗng hoặc null
+        if (newSize.getName() == null || newSize.getName().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(new ApiResponse<>("Tên kích thước không được để trống", null));
+        }
+
         Size size = this.service.getById(id);
         if(size == null) {
             return ResponseEntity.status(404).body(new ApiResponse<>("khong tim thay", null));
