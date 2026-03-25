@@ -41,4 +41,5 @@ public interface ProductDetailRepo extends JpaRepository<ProductDetail, UUID> {
             ORDER BY spct.so_luong ASC
             """, nativeQuery = true)
     List<com.beeshop.sd44.dto.response.LowStockProduct> getLowStockProducts(@Param("threshold") int threshold);
+
 }

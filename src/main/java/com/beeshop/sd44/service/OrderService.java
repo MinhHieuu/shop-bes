@@ -1,23 +1,19 @@
 package com.beeshop.sd44.service;
 
-import com.beeshop.sd44.dto.request.EmployeeOrderRequest;
-import com.beeshop.sd44.dto.request.OrderFilterRequest;
-import com.beeshop.sd44.dto.request.OrderRequest;
-import com.beeshop.sd44.dto.request.ProductDetailRequest;
-import com.beeshop.sd44.dto.response.OrderResponse;
-import com.beeshop.sd44.dto.response.ProductDetailResponse;
-import com.beeshop.sd44.dto.response.UserResponse;
+import com.beeshop.sd44.dto.request.*;
+import com.beeshop.sd44.dto.response.*;
 import com.beeshop.sd44.entity.*;
 import com.beeshop.sd44.repository.*;
 import jakarta.transaction.Transactional;
+import org.hibernate.query.Page;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.awt.print.Pageable;
+import java.util.*;
 
 @Service
 public class OrderService {
@@ -31,12 +27,15 @@ public class OrderService {
     private final VoucherService voucherService;
     private final CartDetailRepo cartDetailRepo;
     private final NotificationService notificationService;
-    private final ProductDetailRepo pdRepo;
+
+    private final CartRepo cartRepo;
+    private final ProductDetailRepo productDetailRepo;
+
     public OrderService(OrderRepo orderRepo, OrderDetailRepo orderDetailRepo, UserService userService,
-            CustomerService customerService, ProductDetailService productDetailService,
-            VoucherService voucherService, CartDetailRepo cartDetailRepo,
-            ProductDetailRepo pdRepo,
-            NotificationService notificationService) {
+                        CustomerService customerService, ProductDetailService productDetailService,
+                        VoucherService voucherService, CartDetailRepo cartDetailRepo,
+                        NotificationService notificationService, CartRepo cartRepo, ProductDetailRepo productDetailRepo) {
+
         this.orderDetailRepo = orderDetailRepo;
         this.orderRepo = orderRepo;
         this.userService = userService;
@@ -45,7 +44,12 @@ public class OrderService {
         this.voucherService = voucherService;
         this.cartDetailRepo = cartDetailRepo;
         this.notificationService = notificationService;
-        this.pdRepo = pdRepo;
+
+//        this.pdRepo = pdRepo;
+
+        this.cartRepo = cartRepo;
+        this.productDetailRepo = productDetailRepo;
+
     }
 
     /**
@@ -66,10 +70,10 @@ public class OrderService {
             if (pdRequest.getQuantity() == null || pdRequest.getQuantity() <= 0) {
                 throw new IllegalArgumentException("So luong phai lon hon 0");
             }
-            if (pdRequest.getQuantity() > productDetail.getQuantity()) {
-                throw new IllegalArgumentException("San pham " + productDetail.getProduct().getName()
-                        + " chi con " + productDetail.getQuantity() + " san pham");
-            }
+//            if (pdRequest.getQuantity() > productDetail.getQuantity() ) {
+//                throw new IllegalArgumentException("San pham " + productDetail.getProduct().getName()
+//                        + " chi con " + productDetail.getQuantity() + " san pham");
+//            }
             subTotal += productDetail.getSalePrice() * pdRequest.getQuantity();
         }
 
@@ -99,6 +103,7 @@ public class OrderService {
         order.setCreatedAt(new Date());
         order.setType(1); // 1 = online
         order.setPaymentDate(new Date());
+        order.setAddress(orderRequest.getAddress());
         order.setPaymentMethod(orderRequest.getPaymentMethod());
         order.setNote(orderRequest.getNote());
         order.setShippingFee(shippingFee);
@@ -111,7 +116,7 @@ public class OrderService {
             order.setStatus(0); // chờ xác nhận
         } else if ("VNPAY".equals(orderRequest.getPaymentMethod())) {
             order.setPaymentStatus(0); // đang thanh toán
-            order.setStatus(0); // đã xác nhận
+            order.setStatus(1); // đã xác nhận
         }
 
         order = this.orderRepo.save(order);
@@ -149,7 +154,7 @@ public class OrderService {
         for (OrderDetail item : order.getDetailList()) {
             ProductDetail productDetail = item.getProductDetail();
             productDetail.setQuantity(productDetail.getQuantity() - item.getQuantity());
-            pdRepo.save(productDetail);
+//            pdRepo.save(productDetail);
         }
     }
     @Transactional
@@ -193,11 +198,11 @@ public class OrderService {
             orderDetail.setQuantity(pdRequest.getQuantity());
             orderDetail.setPrice(productDetail.getSalePrice());
 
-            if(productDetail.getQuantity() - pdRequest.getQuantity() < 0){
-                throw new RuntimeException("So luong san pham trong kho da het");
-            }
-// tru so luong di
-            productDetail.setQuantity(productDetail.getQuantity() - pdRequest.getQuantity());
+//            if(productDetail.getQuantity() - pdRequest.getQuantity() < 0){
+//                throw new RuntimeException("So luong san pham trong kho da het");
+//            }
+//// tru so luong di
+//            productDetail.setQuantity(productDetail.getQuantity() - pdRequest.getQuantity());
 
 
             orderDetailRepo.save(orderDetail);
@@ -221,6 +226,7 @@ public class OrderService {
         if (type == null) {
             type = 0; // 0 = tại quầy (mặc định)
         }
+        order.setCode("HD" + String.format("%03d", orderRepo.count()));
         order.setType(type);
         order.setPaymentDate(new Date());
         order.setPaymentMethod(orderRequest.getPaymentMethod());
@@ -284,6 +290,7 @@ public class OrderService {
         response.setTotal(order.getTotal());
         response.setType(order.getType());
         response.setStatus(order.getStatus());
+        response.setAddress(order.getAddress());
 
         response.setPaymentStatus(order.getPaymentStatus());
         response.setPaymentMethod(order.getPaymentMethod());
@@ -409,6 +416,7 @@ public class OrderService {
      * Nếu status = 1 (đã xác nhận) và operatorId không null → set nguoi_dung_id =
      * người xác nhận.
      */
+    @Transactional
     public Order updateOrderStatus(UUID orderId, Integer status, UUID operatorId) {
         Order order = getOrderById(orderId);
         if (order == null) {
@@ -419,11 +427,19 @@ public class OrderService {
         if (status == 1 && operatorId != null) {
             order.setUser(userService.getUserById(operatorId));
             // tru so luong
+            if(order.getPaymentMethod().equals("COD")){
 
+            }
         }
 
         // Lưu order trước khi xử lý số lượng
         Order saved = orderRepo.save(order);
+
+        // neu thanh toan tai quay vnpay da tru roi nen k tru nua
+        if(status == 1 && order.getType() == 1){
+            handleQuantity(saved);
+            return saved;
+        }
 
         // Nếu đơn bị hủy (status = 3) -> hoàn trả lại tồn kho cho các product detail
         if (status == 3 || status == 1) {
@@ -448,4 +464,128 @@ public class OrderService {
                     orderDetail.getQuantity());
         }
     }
+
+
+    public void addToCart(CartRequest request) {
+
+        Order order = orderRepo
+                .findByCustomerIdAndStatus(request.getCustomerId(), 0)
+                .orElseGet(() -> {
+
+                    Order newOrder = new Order();
+
+                    // set customer đúng cách
+                    Customer customer = new Customer();
+                    customer.setId(request.getCustomerId()); // ⭐ QUAN TRỌNG
+
+                    newOrder.setCustomer(customer);
+                    newOrder.setStatus(0);
+                    newOrder.setCreatedAt(new Date());
+                    newOrder.setTotal(0.0);
+
+                    return orderRepo.save(newOrder);
+                });
+
+        ProductDetail productDetail = productDetailRepo
+                .findById(request.getProductDetailId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm"));
+
+        if (productDetail.getQuantity() < request.getQuantity()) {
+            throw new RuntimeException("Sản phẩm không đủ số lượng");
+        }
+
+        Optional<OrderDetail> optional = orderDetailRepo
+                .findByOrderIdAndProductDetailId(order.getId(), productDetail.getId());
+
+        OrderDetail detail;
+
+        if (optional.isPresent()) {
+
+            detail = optional.get();
+
+            int newQuantity = detail.getQuantity() + request.getQuantity();
+
+            if (newQuantity > productDetail.getQuantity()) {
+                throw new RuntimeException("Vượt quá tồn kho");
+            }
+
+            detail.setQuantity(newQuantity);
+
+        } else {
+
+            detail = new OrderDetail();
+            detail.setOrder(order);
+            detail.setProductDetail(productDetail);
+            detail.setQuantity(request.getQuantity());
+            detail.setPrice(productDetail.getSalePrice());
+        }
+
+        orderDetailRepo.save(detail);
+
+        List<OrderDetail> list = orderDetailRepo.findByOrderId(order.getId());
+
+        double total = 0;
+
+        for (OrderDetail d : list) {
+            total += d.getPrice() * d.getQuantity();
+        }
+
+        order.setTotal(total);
+        orderRepo.save(order);
+    }
+
+    public Page<Order> getAllOrders(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return orderRepo.findAllByOrderByCreatedAtDesc(pageable);
+    }
+
+    public Page<Order> filterOrdersPage(
+            Integer status,
+            Integer paymentStatus,
+            Integer type,
+            String paymentMethod,
+            Date fromDate,
+            Date toDate,
+            int page,
+            int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        return orderRepo.filterOrdersPage(
+                status, paymentStatus, type, paymentMethod, fromDate, toDate, pageable
+        );
+    }
+
+    public List<Order> getByCustomer(UUID customerId) {
+        return orderRepo.findByCustomerIdOrderByCreatedAtDesc(customerId);
+    }
+
+    public List<Order> getByUser(UUID userId) {
+        return orderRepo.findByUserIdOrderByCreatedAtDesc(userId);
+    }
+
+    public Order getDetail(UUID customerId, UUID orderId) {
+        return orderRepo.findByCustomerIdAndId(customerId, orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+    }
+
+    public Long getTotalOrders(Date fromDate, Date toDate) {
+        return orderRepo.getTotalOrders(fromDate, toDate);
+    }
+
+    public List<DailyRevenue> getTotalRevenue(Date fromDate, Date toDate) {
+        return orderRepo.getRevenueByDate(fromDate, toDate);
+    }
+
+    public List<BestSellingProduct> getBestSelling(Date fromDate, Date toDate) {
+        return orderRepo.getBestSellingProducts(fromDate, toDate);
+    }
+    public List<ProductSale> getTopSale(String productId) {
+        return orderRepo.getListSaler(productId);
+    }
+
+    public List<ProductSale> getTopSaleByProduct(String productId) {
+        return orderRepo.getListSalerByProductId(productId);
+    }
+
 }
