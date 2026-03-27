@@ -6,6 +6,7 @@ import com.beeshop.sd44.service.ColorService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,7 +25,16 @@ public class ColorController {
     }
 
     @PostMapping("mau-sac")
-    public ResponseEntity<?> create(@Valid @RequestBody Color color) {
+    public ResponseEntity<?> create(@Valid @RequestBody Color color, BindingResult result) {
+        // Kiểm tra lỗi từ @Valid
+        if (result.hasErrors()) {
+            return ResponseEntity.badRequest().body(new ApiResponse<>(result.getAllErrors().get(0).getDefaultMessage(), null));
+        }
+        // Kiểm tra tên rỗng hoặc null
+        if (color.getName() == null || color.getName().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(new ApiResponse<>("Tên màu sắc không được để trống", null));
+        }
+
         boolean exitsMau = this.service.isNameExit(color.getName());
         if (exitsMau) {
             return ResponseEntity.status(409).body(new ApiResponse<>("da ton tai", null));
@@ -45,7 +55,17 @@ public class ColorController {
 
     @PutMapping("mau-sac/{id}")
     public ResponseEntity<?> update(@PathVariable("id") UUID id,
-            @Valid @RequestBody Color newColor) {
+                                    @Valid @RequestBody Color newColor,
+                                    BindingResult result) {
+        // Kiểm tra lỗi từ @Valid
+        if (result.hasErrors()) {
+            return ResponseEntity.badRequest().body(new ApiResponse<>(result.getAllErrors().get(0).getDefaultMessage(), null));
+        }
+        // Kiểm tra tên rỗng hoặc null
+        if (newColor.getName() == null || newColor.getName().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(new ApiResponse<>("Tên màu sắc không được để trống", null));
+        }
+
         Color color = this.service.getById(id);
         if (color == null) {
             return ResponseEntity.status(404).body(new ApiResponse<>("khong tim thay", null));

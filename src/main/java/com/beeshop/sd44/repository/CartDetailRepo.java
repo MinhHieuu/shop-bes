@@ -19,4 +19,5 @@ public interface CartDetailRepo extends JpaRepository<CartDetail, UUID> {
     Optional<CartDetail> findByCartIdAndProductDetailId(UUID cart, UUID productId);
 
     void deleteByProductDetailIdIn(List<UUID> listId);
+    Optional<CartDetail> findByOrderIdAndProductId(UUID orderId, UUID productId);
 }
