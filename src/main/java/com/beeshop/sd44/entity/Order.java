@@ -47,6 +47,16 @@ public class Order {
     private Voucher voucher;
     @OneToMany(mappedBy = "order")
     private List<OrderDetail> detailList;
+    @Column(name = "dia_chi")
+    private String address;
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
 
     public UUID getId() {
         return id;

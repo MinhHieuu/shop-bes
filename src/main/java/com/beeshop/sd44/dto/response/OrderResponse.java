@@ -21,8 +21,17 @@ public class OrderResponse {
     private UserResponse userResponse;
     private UserResponse customerResponse;
     private List<ProductDetailResponse> productDetailResponses;
+    private String address;
     // private Integer quantity;
     // private Integer price;
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
 
     public String getId() {
         return id;

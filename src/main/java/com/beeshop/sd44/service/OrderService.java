@@ -100,6 +100,7 @@ public class OrderService {
         order.setType(1); // 1 = online
         order.setPaymentDate(new Date());
         order.setPaymentMethod(orderRequest.getPaymentMethod());
+        order.setAddress(orderRequest.getAddress());
         order.setNote(orderRequest.getNote());
         order.setShippingFee(shippingFee);
         order.setTotal(total);
@@ -285,7 +286,7 @@ public class OrderService {
         response.setTotal(order.getTotal());
         response.setType(order.getType());
         response.setStatus(order.getStatus());
-
+        response.setAddress(order.getAddress());
         response.setPaymentStatus(order.getPaymentStatus());
         response.setPaymentMethod(order.getPaymentMethod());
         if (order.getVoucher() != null) {
