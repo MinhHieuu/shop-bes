@@ -23,7 +23,7 @@ public interface OrderRepo extends JpaRepository<Order, UUID> {
 
 	List<Order> findAllByOrderByCreatedAtDesc();
 
-	@Query("SELECT o FROM Order o WHERE " +
+	@Query("SELECT o FROM Order o WHERE " + "(:name IS NULL OR o.code = :name) AND" +
 			"(:status IS NULL OR o.status = :status) AND " +
 			"(:paymentStatus IS NULL OR o.paymentStatus = :paymentStatus) AND " +
 			"(:type IS NULL OR o.type = :type) AND " +
@@ -32,6 +32,7 @@ public interface OrderRepo extends JpaRepository<Order, UUID> {
 			"(:toDate IS NULL OR o.createdAt <= :toDate) " +
 			"ORDER BY o.createdAt DESC")
 	List<Order> findOrdersByFilter(
+			@Param("name") String name,
 			@Param("status") Integer status,
 			@Param("paymentStatus") Integer paymentStatus,
 			@Param("type") Integer type,

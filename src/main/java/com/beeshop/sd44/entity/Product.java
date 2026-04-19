@@ -18,6 +18,8 @@ public class Product {
     @NotBlank(message = "ten khong duoc de trong")
     @Column(name = "ten")
     private String name;
+    @Column(name = "ma_san_pham")
+    private String code;
     @Column(name = "ngay_tao")
     private Date createdAt;
     @Column(name = "ngay_sua")
@@ -46,6 +48,13 @@ public class Product {
         this.id = id;
     }
 
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
 
     public Marterial getMarterial() {
         return marterial;

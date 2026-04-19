@@ -37,6 +37,7 @@ public class EmployeeOrderController {
 
     @GetMapping("")
     public ResponseEntity<ApiResponse<List<OrderResponse>>> getAllOrders(
+            @RequestParam(required = false) String name,
             @RequestParam(required = false) Integer status,
             @RequestParam(required = false) Integer paymentStatus,
             @RequestParam(required = false) Integer type,
@@ -46,12 +47,13 @@ public class EmployeeOrderController {
 
         // Nếu có filter param, sử dụng filtering
         if (status != null || paymentStatus != null || type != null ||
-            paymentMethod != null || fromDate != null || toDate != null) {
+            paymentMethod != null || fromDate != null || toDate != null || name != null) {
             OrderFilterRequest filter = new OrderFilterRequest();
             filter.setStatus(status);
             filter.setPaymentStatus(paymentStatus);
             filter.setType(type);
             filter.setPaymentMethod(paymentMethod);
+            filter.setName(name);
             if (fromDate != null) {
                 filter.setFromDate(new Date(fromDate));
             }

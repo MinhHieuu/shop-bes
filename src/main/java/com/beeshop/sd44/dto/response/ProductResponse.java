@@ -7,6 +7,7 @@ import java.util.UUID;
 public class ProductResponse {
     private UUID id;
     private String name;
+    private String code;
     private String image;
     private String status;
     private UUID marterialId;
@@ -22,6 +23,14 @@ public class ProductResponse {
 
     public void setId(UUID id) {
         this.id = id;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 
     public String getName() {

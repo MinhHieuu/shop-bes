@@ -6,6 +6,7 @@ import java.util.UUID;
 public class ProductRequest {
     private UUID id;
     private String name;
+    private String code;
     private String image;
     private Integer status;
     private UUID marterialId;
@@ -67,6 +68,14 @@ public class ProductRequest {
 
     public UUID getBrandId() {
         return brandId;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 
     public void setBrandId(UUID brandId) {

@@ -11,6 +11,7 @@ import java.util.Date;
  * - fromDate, toDate: khoảng thời gian
  */
 public class OrderFilterRequest {
+    private String name;
     private Integer status;
     private Integer paymentStatus;
     private Integer type;
@@ -28,6 +29,14 @@ public class OrderFilterRequest {
         this.paymentMethod = paymentMethod;
         this.fromDate = fromDate;
         this.toDate = toDate;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public Integer getStatus() {

@@ -128,7 +128,8 @@ public class OrderService {
             orderDetail.setPrice(productDetail.getSalePrice());
             orderDetailRepo.save(orderDetail);
             // Trừ tồn kho
-//            productDetail.setQuantity(productDetail.getQuantity() - pdRequest.getQuantity());
+            if(order.getStatus() == 1)
+        productDetail.setQuantity(productDetail.getQuantity() - pdRequest.getQuantity());
             cartIdsToDelete.add(productDetail.getId());
         }
 
@@ -198,8 +199,8 @@ public class OrderService {
 //                throw new RuntimeException("So luong san pham trong kho da het");
 //            }
 //// tru so luong di
-//            productDetail.setQuantity(productDetail.getQuantity() - pdRequest.getQuantity());
-
+//            if(order.getStatus() == 1)
+//        productDetail.setQuantity(productDetail.getQuantity() - pdRequest.getQuantity());
 
             orderDetailRepo.save(orderDetail);
         }
@@ -237,10 +238,10 @@ public class OrderService {
         }
         if ("CASH".equals(orderRequest.getPaymentMethod())) {
             order.setPaymentStatus(1); // đã thanh toán
-            order.setStatus(1);
+            order.setStatus(5);
         } else if ("VNPAY".equals(orderRequest.getPaymentMethod())) {
             order.setPaymentStatus(0); // đang thanh toán
-            order.setStatus(1);
+            order.setStatus(5);
         }
         return this.orderRepo.save(order);
     }
@@ -385,6 +386,7 @@ public class OrderService {
 
     public List<OrderResponse> getOrdersByFilter(OrderFilterRequest filter) {
         List<Order> orders = orderRepo.findOrdersByFilter(
+                filter.getName(),
                 filter.getStatus(),
                 filter.getPaymentStatus(),
                 filter.getType(),
@@ -432,13 +434,22 @@ public class OrderService {
 
         // neu thanh toan tai quay vnpay da tru roi nen k tru nua
         if(status == 1 && order.getType() == 1){
-            handleQuantity(saved);
+//            handleQuantity(saved);
             return saved;
         }
-
+        if(status == 1 && order.getType() == 0){
+//            handleQuantity(saved);
+            return saved;
+        }
         // Nếu đơn bị hủy (status = 3) -> hoàn trả lại tồn kho cho các product detail
-        if (status == 3 || status == 1) {
+        if ( status == 1) {
             handleQuantity(saved);
+        }
+
+        if(status == 3) {
+            if(order.getStatus() == 1) {
+                handleQuantity(saved);
+            }
         }
 
         return saved;

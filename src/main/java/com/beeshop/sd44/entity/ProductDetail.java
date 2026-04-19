@@ -11,6 +11,17 @@ public class ProductDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+    @Column(name = "ma_ctsp")
+    private String code;
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
     @Column(name = "mo_ta")
     private String description;
     @Column(name = "so_luong")

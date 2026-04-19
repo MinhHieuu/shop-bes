@@ -35,7 +35,7 @@ public class SecurityConfig {
             "/api/login", "/api/check-customer", "/", "/product/**", "/api/register", "/api/products", "/api/refresh",
             "/api/order/vnpay-return", "/api/order/check-voucher", "/storage/**", "/images/**",
             "/sale", "/sale/**", "/api/admin/size", "/api/admin/chat-lieu", "/api/admin/thuong-hieu",
-            "/ws/**", "/api/notifications", "/api/notifications/**", "/api/admin/vouchers/**"
+            "/ws/**", "/api/notifications", "/api/notifications/**", "/api/admin/vouchers/**", "/api/ghn/**"
     };
 
     @Bean
@@ -43,10 +43,6 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public RestTemplate restTemplate() {
-        return new RestTemplate();
-    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
