@@ -40,6 +40,15 @@ public class ProductService {
        return listResponse;
     }
 
+    public List<ProductResponse> getByStatus() {
+        List<Product> list = this.repo.findByStatus(1);
+        List<ProductResponse> listResponse = new ArrayList<>();
+        for(Product product : list) {
+            listResponse.add(hanldeResponse(product));
+        }
+        return listResponse;
+    }
+
     public boolean isNameExit(String name) {
         return this.repo.existsByName(name);
     }
@@ -49,8 +58,9 @@ public class ProductService {
         Product product = new Product();
         product.setCreatedAt(new Date());
         product = buildProduct(product, request);
-        List<Image> images = saveDetail(product, request.getProductDetails(), null);
         this.repo.save(product);
+        List<Image> images = saveDetail(product, request.getProductDetails(), null);
+
         this.imageRepo.saveAll(images);
     }
 
@@ -84,8 +94,8 @@ public class ProductService {
         product.setUpdatedAt(new Date());
         product = buildProduct(product, request);
 
-        List<Image> images = saveDetail(product, request.getProductDetails(), request.getProductDetailsUpdate());
         this.repo.save(product);
+        List<Image> images = saveDetail(product, request.getProductDetails(), request.getProductDetailsUpdate());
         this.imageRepo.saveAll(images);
     }
 

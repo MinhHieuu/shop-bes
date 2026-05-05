@@ -112,7 +112,7 @@ public class OrderService {
             order.setStatus(0); // chờ xác nhận
         } else if ("VNPAY".equals(orderRequest.getPaymentMethod())) {
             order.setPaymentStatus(0); // đang thanh toán
-            order.setStatus(1); // đã xác nhận
+            order.setStatus(0); // chờ xác nhận
         }
 
         order = this.orderRepo.save(order);
@@ -241,7 +241,7 @@ public class OrderService {
             order.setStatus(5);
         } else if ("VNPAY".equals(orderRequest.getPaymentMethod())) {
             order.setPaymentStatus(0); // đang thanh toán
-            order.setStatus(5);
+            order.setStatus(0);
         }
         return this.orderRepo.save(order);
     }

@@ -31,6 +31,11 @@ public class ProductController {
         return ResponseEntity.ok(new ApiResponse<>("lay thanh cong", list));
     }
 
+    @GetMapping("san-pham-status")
+    public ResponseEntity<?> getProductByStatus() {
+        List<ProductResponse> list = this.productService.getByStatus();
+        return ResponseEntity.ok(new ApiResponse<>("lay thanh cong", list));
+    }
     @GetMapping("san-pham/{id}")
     public ResponseEntity<ApiResponse<ProductResponse>> getProductDetail(@PathVariable("id") UUID id) {
         Product product = this.productService.getById(id);
