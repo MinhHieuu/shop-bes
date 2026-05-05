@@ -122,16 +122,16 @@ public class InvoicePdfService {
         String customerName = "--";
         String customerPhone = "--";
         String customerAddress = "--";
-        if (order.getUser() != null) {
-            customerName = safeStr(order.getUser().getName());
-            customerPhone = safeStr(order.getUser().getPhone());
-            customerAddress = safeStr(order.getUser().getAddress());
-        }
+//        if (order.getUser() != null) {
+//            customerName = safeStr(order.getUser().getName());
+//            customerPhone = safeStr(order.getUser().getPhone());
+//            customerAddress = safeStr(order.getUser().getAddress());
+//        }
         if (order.getCustomer() != null) {
             if (order.getCustomer().getTen() != null) customerName = order.getCustomer().getTen();
             if (order.getCustomer().getSdt() != null) customerPhone = order.getCustomer().getSdt();
             if (order.getCustomer().getDiaChi() != null) customerAddress = order.getCustomer().getDiaChi();
-        }
+        }else customerName = "khách lẻ";
 
         infoTable.addCell(noBorderCell("Khách hàng: " + customerName, font, 10));
         infoTable.addCell(noBorderCell("Phương thức TT: " + formatPaymentMethod(order.getPaymentMethod()), font, 10));

@@ -450,6 +450,9 @@ public class OrderService {
             if(order.getStatus() == 1) {
                 handleQuantity(saved);
             }
+//            if(order.getType() == 0) {
+//                handleQuantity(saved);
+//            }
         }
 
         return saved;

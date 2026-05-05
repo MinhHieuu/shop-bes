@@ -3,12 +3,17 @@ package com.beeshop.sd44.controller;
 import com.beeshop.sd44.dto.request.EmployeeOrderRequest;
 import com.beeshop.sd44.dto.request.OrderFilterRequest;
 import com.beeshop.sd44.dto.response.OrderResponse;
+import com.beeshop.sd44.dto.response.VNPayResponse;
 import com.beeshop.sd44.entity.ApiResponse;
 import com.beeshop.sd44.service.OrderService;
+import com.beeshop.sd44.service.VNPayService;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -17,22 +22,35 @@ import java.util.UUID;
 @RequestMapping("/api/employee/orders")
 public class EmployeeOrderController {
     private final OrderService orderService;
+    private final VNPayService vnPayService;
 
-    public EmployeeOrderController(OrderService orderService) {
+    public EmployeeOrderController(OrderService orderService, VNPayService vnPayService) {
         this.orderService = orderService;
+        this.vnPayService = vnPayService;
+
     }
 
     @PostMapping("")
-    public ResponseEntity<ApiResponse<OrderResponse>> createOrder(@RequestBody EmployeeOrderRequest request,
-                                                                  Authentication authentication) {
-//        if (!"CASH".equals(request.getPaymentMethod())) {
-//            return ResponseEntity.badRequest().body(new ApiResponse<>("chi ho tro thanh toan tien mat", null));
-//        }
+    public ResponseEntity<ApiResponse<Object>> createOrder(@RequestBody EmployeeOrderRequest request,
+                                                                  Authentication authentication, HttpServletRequest httpRequest) throws ServletException,
+            IOException {
+
         UUID employeeId = UUID.fromString(authentication.getName());
         OrderResponse response = orderService.handleCounterOrder(request, employeeId);
-        System.out.println("employee - ship: ");
+        if ("CASH".equals(request.getPaymentMethod())) {
+            return ResponseEntity.status(201).body(new ApiResponse<>("tao don hang thanh cong", null));
+        }else {
+            VNPayResponse vnPayResponse = this.vnPayService.createPaymentLink(response.getId(),
+                    request.getTotal().longValue(),
+                    "Thanh toan don hang : " + response.getCode(), httpRequest);
+            if (vnPayResponse == null || !vnPayResponse.isSuccess()) {
+                return ResponseEntity.internalServerError()
+                        .body(new ApiResponse<>("tao link thanh toan that bai", null));
+            }
+            System.out.println("employee - ship: ");
+            return ResponseEntity.status(201).body(new ApiResponse<>("tao don hang thanh cong", vnPayResponse));
+        }
 
-        return ResponseEntity.status(201).body(new ApiResponse<>("tao don hang thanh cong", response));
     }
 
     @GetMapping("")

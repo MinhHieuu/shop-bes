@@ -113,6 +113,11 @@ public class OrderController {
 
             // Bắn thông báo VNPAY thanh toán thành công
             Order paidOrder = orderService.getOrderById(UUID.fromString(orderId));
+            if(paidOrder.getType() == 1) {
+                orderService.updateOrderStatus(UUID.fromString(orderId), 1);
+            }else {
+                orderService.updateOrderStatus(UUID.fromString(orderId), 5);
+            }
             if (paidOrder != null) {
                 notificationService.createAndBroadcast(
                         "Thanh toán VNPAY thành công",
